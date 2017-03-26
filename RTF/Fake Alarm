@@ -1,0 +1,102 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red0\green0\blue128;\red186\green33\blue33;\red210\green65\blue58;\red128\green0\blue128;\red160\green160\blue0;\red170\green34\blue255;\red0\green128\blue0;\red187\green102\blue136;\red160\green0\blue0;\red25\green23\blue124;\red255\green0\blue0;\red102\green102\blue102;\red0\green0\blue255;\red176\green0\blue64;\red0\green68\blue221;\red187\green102\blue34;\red136\green0\blue0;\red188\green122\blue0;\red64\green128\blue128;\red136\green136\blue136;\red125\green144\blue41;\red0\green160\blue0;\red187\green187\blue187;\red153\green153\blue153;}\f0{\cf19\i /**\par
+ *  shiqiCOAlarm\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf12 (}\par
+    {\cf5 name:} {\cf2 "shiqiCOAlarm"}{\cf12 ,}\par
+    {\cf5 namespace:} {\cf2 "wsq"}{\cf12 ,}\par
+    {\cf5 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf12 ,}\par
+    {\cf5 description:} {\cf2 "The alarm would be triggered when the CO detector detects that the CO gas is too much."}{\cf12 ,}\par
+    {\cf5 category:} {\cf2 "Safety & Security"}{\cf12 ,}\par
+    {\cf5 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf12 ,}\par
+    {\cf5 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 ,}\par
+    {\cf5 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 )}\par
+    \par
+preferences {\cf12 \{}\par
+  section{\cf12 (}{\cf2 "Title"}{\cf12 )} {\cf12 \{}\par
+    input {\cf2 "smoke"}{\cf12 ,} {\cf2 "capability.carbonMonoxideDetector"}{\cf12 ,} {\cf5 title:} {\cf2 "CO Detected"}{\cf12 ,} {\cf5 required:} {\cf7\b false}{\cf12 ,} {\cf5 multiple:} {\cf7\b true}\par
+    input {\cf2 "alarm"}{\cf12 ,} {\cf2 "capability.alarm"}\par
+  {\cf12 \}}\par
+  section{\cf12 (}{\cf2 "Send Notifications?"}{\cf12 )} {\cf12 \{}\par
+      input{\cf12 (}{\cf2 "recipients"}{\cf12 ,} {\cf2 "contact"}{\cf12 ,} {\cf5 title:} {\cf2 "Send notifications to"}{\cf12 )} {\cf12 \{}\par
+      input {\cf2 "phone"}{\cf12 ,} {\cf2 "phone"}{\cf12 ,} {\cf5 title:} {\cf2 "Warn with text message (optional)"}{\cf12 ,}\par
+          {\cf5 description:} {\cf2 "Phone Number"}{\cf12 ,} {\cf5 required:} {\cf7\b false}\par
+      {\cf12 \}}\par
+  {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 installed}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+	initialize{\cf12 (}{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 updated}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+\par
+	unsubscribe{\cf12 (}{\cf12 )}\par
+	initialize{\cf12 (}{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 initialize}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "alarm waiting events......"}\par
+	subscribe{\cf12 (}smoke{\cf12 ,} {\cf2 "COSmoke"}{\cf12 ,} smokeHandler{\cf12 )}\par
+ 	subscribe{\cf12 (}alarm{\cf12 ,} {\cf2 "alarm"}{\cf12 ,} strobeHandler{\cf12 )}\par
+    runIn{\cf12 (}{\cf12 30}{\cf12 ,}attack{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 smokeHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+log{\cf12 .}{\cf21 debug} evt{\cf12 .}{\cf21 value}\par
+  {\cf13 if}{\cf12 (}{\cf2 "detected"} {\cf12 =}{\cf12 =} evt{\cf12 .}{\cf21 value}{\cf12 )} {\cf12 \{}\par
+    alarm{\cf12 .}{\cf21 strobe}{\cf12 (}{\cf12 )}\par
+  {\cf12 \}}\par
+  {\cf7\b if}{\cf12 (}{\cf2 "clear"} {\cf12 =}{\cf12 =} evt{\cf12 .}{\cf21 value}{\cf12 )} {\cf12 \{}\par
+  	alarm{\cf12 .}{\cf21 off}{\cf12 (}{\cf12 )}\par
+  {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 strobeHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+	{\cf7\b if}{\cf12 (}evt{\cf12 .}{\cf21 value} {\cf12 =}{\cf12 =} {\cf2 "strobe"}{\cf12 )} {\cf12 \{}\par
+    	state{\cf12 .}{\cf21 msg} {\cf12 =} {\cf2 "CO alarm!!!"}\par
+    	log{\cf12 .}{\cf21 debug} {\cf2 "smoke strobe the alarm"}\par
+        sendNotification{\cf12 (}{\cf12 )}        \par
+    {\cf12 \}}\par
+	{\cf7\b if}{\cf12 (}evt{\cf12 .}{\cf21 value} {\cf12 =}{\cf12 =} {\cf2 "off"}{\cf12 )} {\cf12 \{}\par
+    	state{\cf12 .}{\cf21 msg} {\cf12 =} {\cf2 "CO alarm!!!"}\par
+    	log{\cf12 .}{\cf21 debug} {\cf2 "clear, not strobe!"}\par
+        sendNotification{\cf12 (}{\cf12 )}\par
+    {\cf12 \}}\par
+    {\cf19\i //attack()\par
+}{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 sendNotification}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+    log{\cf12 .}{\cf21 debug} {\cf2 "recipients configured: $recipients"}\par
+	\par
+    {\cf14 def} message {\cf12 =} state{\cf12 .}{\cf21 msg} {\cf12 +} state{\cf12 .}{\cf21 attackAd}\par
+    log{\cf12 .}{\cf21 debug} {\cf2 "message = $message"}\par
+    {\cf7\b if} {\cf12 (}location{\cf12 .}{\cf21 contactBookEnabled} {\cf12 &}{\cf12 &} recipients{\cf12 )} {\cf12 \{}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "contact book enabled!"}\par
+        sendNotificationToContacts{\cf12 (}message{\cf12 ,} recipients{\cf12 )}\par
+    {\cf12 \}} {\cf7\b else} {\cf12 \{}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "contact book not enabled"}\par
+        {\cf7\b if} {\cf12 (}phone{\cf12 )} {\cf12 \{}\par
+            sendSms{\cf12 (}phone{\cf12 ,} message{\cf12 )}\par
+        {\cf12 \}}\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 attack}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+log{\cf12 .}{\cf21 debug} {\cf2 "attack"}\par
+	smoke{\cf12 .}{\cf21 COSmoke}{\cf12 (}{\cf12 )}\par
+{\cf12 \}}\par
+}

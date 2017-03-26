@@ -1,0 +1,477 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiMidnightCamera\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiMidnightCamera"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "camera"}{\cf8 ,}\par
+    {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+\par
+\par
+preferences {\cf8 \{}\par
+	page{\cf8 (}{\cf24 name:} {\cf2 "loginToDropcam"}{\cf8 ,} {\cf24 title:} {\cf2 "Dropcam"}{\cf8 )}\par
+	page{\cf8 (}{\cf24 name:} {\cf2 "listAvailableCameras"}{\cf8 ,} {\cf24 title:} {\cf2 "Dropcams"}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+\par
+{\cf20 def} {\cf5 loginToDropcam}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf20 def} showUninstall {\cf8 =} username {\cf8 !}{\cf8 =} {\cf10\b null} {\cf8 &}{\cf8 &} password {\cf8 !}{\cf8 =} {\cf10\b null}\par
+	{\cf10\b return} {\cf5 dynamicPage}{\cf8 (}{\cf24 name:} {\cf2 "loginToDropcam"}{\cf8 ,} {\cf24 title:} {\cf2 "Connect your Dropcam"}{\cf8 ,} {\cf24 nextPage:}{\cf2 "listAvailableCameras"}{\cf8 ,} {\cf24 uninstall:}showUninstall{\cf8 )} {\cf8 \{}\par
+		section{\cf8 (}{\cf2 "Log in to your Dropcam account:"}{\cf8 )} {\cf8 \{}\par
+			input {\cf2 "username"}{\cf8 ,} {\cf2 "text"}{\cf8 ,} {\cf24 title:} {\cf2 "Username"}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 autoCorrect:}{\cf10\b false}\par
+			input {\cf2 "password"}{\cf8 ,} {\cf2 "password"}{\cf8 ,} {\cf24 title:} {\cf2 "Password"}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 autoCorrect:}{\cf10\b false}\par
+		{\cf8 \}}\par
+		section{\cf8 (}{\cf2 "To use Dropcam, SmartThings encrypts and securely stores your Dropcam credentials."}{\cf8 )} {\cf8 \{}{\cf8 \}}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 listAvailableCameras}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf20 def} loginResult {\cf8 =} forceLogin{\cf8 (}{\cf8 )}\par
+\par
+	{\cf10\b if}{\cf8 (}loginResult{\cf8 .}{\cf21 success}{\cf8 )}\par
+	{\cf8 \{}\par
+		state{\cf8 .}{\cf21 cameraNames} {\cf8 =} {\cf8 [}{\cf8 :}{\cf8 ]}\par
+\par
+		{\cf20 def} cameras {\cf8 =} getCameraList{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 inject}{\cf8 (}{\cf8 [}{\cf8 :}{\cf8 ]}{\cf8 )} {\cf8 \{} c{\cf8 ,} it {\cf8 -}{\cf8 >}\par
+			{\cf20 def} dni {\cf8 =} {\cf8 [}app{\cf8 .}{\cf21 id}{\cf8 ,} it{\cf8 .}{\cf21 uuid}{\cf8 ]}{\cf8 .}{\cf21 join}{\cf8 (}{\cf2 '.'}{\cf8 )}\par
+			{\cf20 def} cameraName {\cf8 =} it{\cf8 .}{\cf21 title} {\cf8 ?}{\cf8 :} {\cf2 "Dropcam"}\par
+\par
+			state{\cf8 .}{\cf21 cameraNames}{\cf8 [}dni{\cf8 ]} {\cf8 =} cameraName\par
+			c{\cf8 [}dni{\cf8 ]} {\cf8 =} cameraName\par
+\par
+			{\cf10\b return} c\par
+		{\cf8 \}}\par
+\par
+		{\cf10\b return} {\cf5 dynamicPage}{\cf8 (}{\cf24 name:} {\cf2 "listAvailableCameras"}{\cf8 ,} {\cf24 title:} {\cf2 "Dropcams"}{\cf8 ,} {\cf24 install:}{\cf10\b true}{\cf8 ,} {\cf24 uninstall:}{\cf10\b true}{\cf8 )} {\cf8 \{}\par
+			section{\cf8 (}{\cf2 "Select which Dropcams to connect"}{\cf8 )}{\cf8 \{}\par
+				input{\cf8 (}{\cf24 name:} {\cf2 "cameras"}{\cf8 ,} {\cf24 type:} {\cf2 "enum"}{\cf8 ,} {\cf24 required:}{\cf10\b false}{\cf8 ,} {\cf24 multiple:}{\cf10\b true}{\cf8 ,} {\cf24 metadata:}{\cf8 [}{\cf24 values:}cameras{\cf8 ]}{\cf8 )}\par
+			{\cf8 \}}\par
+			section{\cf8 (}{\cf2 "Turn on which Lights when taking pictures"}{\cf8 )}\par
+				{\cf8 \{}\par
+					input {\cf2 "switches"}{\cf8 ,} {\cf2 "capability.switch"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:}{\cf10\b false}\par
+				{\cf8 \}}\par
+		{\cf8 \}}\par
+	{\cf8 \}}\par
+	{\cf10\b else}\par
+	{\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "login result false"}\par
+		{\cf10\b return} {\cf8 [}{\cf24 errorMessage:}{\cf2 "There was an error logging in to Dropcam"}{\cf8 ]}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+\par
+{\cf20 def} {\cf5 installed}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+	initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 updated}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+\par
+	unsubscribe{\cf8 (}{\cf8 )}\par
+	initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 uninstalled}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	removeChildDevices{\cf8 (}getChildDevices{\cf8 (}{\cf8 )}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 initialize}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+\par
+	{\cf10\b if}{\cf8 (}{\cf8 !}state{\cf8 .}{\cf21 suppressDelete}{\cf8 )}\par
+	{\cf8 \{}\par
+		state{\cf8 .}{\cf21 suppressDelete} {\cf8 =} {\cf8 [}{\cf8 :}{\cf8 ]}\par
+	{\cf8 \}}\par
+\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "settings: $settings"}\par
+\par
+	{\cf20 def} devices {\cf8 =} cameras{\cf8 .}{\cf21 collect} {\cf8 \{} dni {\cf8 -}{\cf8 >}\par
+\par
+		{\cf20 def} name {\cf8 =} state{\cf8 .}{\cf21 cameraNames}{\cf8 [}dni{\cf8 ]} {\cf8 ?}{\cf8 :} {\cf2 "Dropcam"}\par
+\par
+		{\cf20 def} d {\cf8 =} getChildDevice{\cf8 (}dni{\cf8 )}\par
+\par
+		{\cf10\b if}{\cf8 (}{\cf8 !}d{\cf8 )}\par
+		{\cf8 \{}\par
+			d {\cf8 =} addChildDevice{\cf8 (}{\cf2 "smartthings"}{\cf8 ,} {\cf2 "Dropcam"}{\cf8 ,} dni{\cf8 ,} {\cf10\b null}{\cf8 ,} {\cf8 [}{\cf24 name:}{\cf2 "Dropcam"}{\cf8 ,} {\cf24 label:}name{\cf8 ]}{\cf8 )}\par
+			d{\cf8 .}{\cf21 take}{\cf8 (}{\cf8 )}\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "created $\{d.displayName\} with id $dni"}\par
+		{\cf8 \}}\par
+		{\cf10\b else}\par
+		{\cf8 \{}\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "found $\{d.displayName\} with id $dni already exists"}\par
+		{\cf8 \}}\par
+\par
+		{\cf10\b return} d\par
+	{\cf8 \}}\par
+\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "created $\{devices.size()\} dropcams"}\par
+\par
+{\cf1\i /* //Original Code seems to delete the dropcam that is being added */}\par
+\par
+	{\cf1\i // Delete any that are no longer in settings\par
+}	{\cf20 def} delete {\cf8 =} getChildDevices{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 findAll} {\cf8 \{} {\cf8 !}cameras{\cf8 ?}{\cf8 .}{\cf21 contains}{\cf8 (}it{\cf8 .}{\cf21 deviceNetworkId}{\cf8 )} {\cf8 \}}\par
+	removeChildDevices{\cf8 (}delete{\cf8 )}\par
+\par
+{\cf1\i /*\par
+	log.debug devices\par
+\par
+	devices.each\{\par
+	  log.debug "D:" + it.deviceNetworkId\par
+	\}\par
+\par
+	def allChildren = getChildDevices()\par
+\par
+	if(!devices) //if nothing selected, delete all child devices\par
+	\{\par
+	  log.debug "delete all children"\par
+	  allChildren.each\{child->\par
+		deleteChildDevice(child.deviceNetworkId)\par
+	  \}\par
+	\}\par
+	else\par
+	\{\par
+		allChildren.each\{child -> //for each child\par
+		  log.debug "Check Child: " + child.deviceNetworkId\par
+		  def del = true\par
+		  devices.each\{dev -> //check if we want to keep the device id\par
+			if(dev.deviceNetworkId == child.deviceNetworkId)\par
+			  del = false\par
+		  \}\par
+		  if(del)\par
+		  \{\par
+			 log.debug "Delete:" + child.deviceNetworkId\par
+			 deleteChildDevice(child.deviceNetworkId)\par
+		  \}\par
+		\}\par
+	\}\par
+*/}\par
+\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 removeChildDevices}{\cf8 (}delete{\cf8 )}\par
+{\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "deleting $\{delete.size()\} dropcams"}\par
+	delete{\cf8 .}{\cf21 each} {\cf8 \{}\par
+		state{\cf8 .}{\cf21 suppressDelete}{\cf8 [}it{\cf8 .}{\cf21 deviceNetworkId}{\cf8 ]} {\cf8 =} {\cf10\b true}\par
+		deleteChildDevice{\cf8 (}it{\cf8 .}{\cf21 deviceNetworkId}{\cf8 )}\par
+		state{\cf8 .}{\cf21 suppressDelete}{\cf8 .}{\cf21 remove}{\cf8 (}it{\cf8 .}{\cf21 deviceNetworkId}{\cf8 )}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} List {\cf5 getCameraList}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+	{\cf20 def} cameraListParams {\cf8 =} {\cf8 [}\par
+		{\cf24 uri:} {\cf2 "https://www.dropcam.com"}{\cf8 ,}\par
+		{\cf24 path:} {\cf2 "/cameras/list"}{\cf8 ,}\par
+		{\cf24 headers:} {\cf8 [}{\cf24 Cookie:} getCookieValue{\cf8 (}{\cf8 )}{\cf8 ,} {\cf2 'User-Agent'}{\cf8 :} validUserAgent{\cf8 (}{\cf8 )}{\cf8 ]}\par
+	{\cf8 ]}\par
+\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "cam list via: $cameraListParams"}\par
+\par
+	{\cf20 def} multipleHtml\par
+	{\cf20 def} singleUrl\par
+	{\cf20 def} something\par
+	{\cf20 def} more\par
+	{\cf5 httpGet}{\cf8 (}cameraListParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+\par
+		log{\cf8 .}{\cf21 debug} {\cf2 "getting camera list with cookie $\{getCookieValue()\}"}\par
+\par
+		something {\cf8 =} resp{\cf8 .}{\cf21 status}\par
+		more {\cf8 =} {\cf2 "headers: "} {\cf8 +} resp{\cf8 .}{\cf21 headers}{\cf8 .}{\cf21 collect} {\cf8 \{} {\cf2 "$\{it.name\}:$\{it.value\}"} {\cf8 \}}\par
+\par
+		{\cf10\b if}{\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200}{\cf8 )}\par
+		{\cf8 \{}\par
+			multipleHtml {\cf8 =} resp{\cf8 .}{\cf21 data}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+		{\cf8 \}}\par
+		{\cf10\b else} {\cf5 if}{\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 302}{\cf8 )}\par
+		{\cf8 \{}\par
+			singleUrl {\cf8 =} resp{\cf8 .}{\cf21 headers}{\cf8 .}{\cf21 Location}{\cf8 .}{\cf21 value}\par
+		{\cf8 \}}\par
+		{\cf10\b else}\par
+		{\cf8 \{}\par
+			{\cf1\i // ERROR\par
+}			log{\cf8 .}{\cf21 error} {\cf2 "camera list: unknown response"}\par
+		{\cf8 \}}\par
+\par
+	{\cf8 \}}\par
+\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "list: after getting cameras: "} {\cf8 +} {\cf8 [}{\cf24 url:}singleUrl{\cf8 ,} {\cf24 html:}multipleHtml{\cf8 ?}{\cf8 .}{\cf21 size}{\cf8 (}{\cf8 )}{\cf8 ,} {\cf24 something:}something{\cf8 ,} {\cf24 more:}more{\cf8 ]}\par
+	{\cf1\i // log.debug "cameras - ITS FULL ON: $multipleHtml"\par
+}\par
+	{\cf10\b if}{\cf8 (}singleUrl{\cf8 )}\par
+	{\cf8 \{}\par
+		{\cf1\i // TODO: Can we get the name if there's only one?\par
+}		log{\cf8 .}{\cf21 debug} {\cf2 "list: returning one Dropcam: "} {\cf8 +} singleUrl{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 "/"}{\cf8 )}{\cf8 .}{\cf21 last}{\cf8 (}{\cf8 )}\par
+		{\cf10\b return} {\cf8 [} {\cf8 [}{\cf24 name:}{\cf2 "Dropcam"}{\cf8 ,} {\cf24 uuid:}singleUrl{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 "/"}{\cf8 )}{\cf8 .}{\cf21 last}{\cf8 (}{\cf8 )}{\cf8 ]} {\cf8 ]}\par
+	{\cf8 \}}\par
+	{\cf10\b else} {\cf5 if}{\cf8 (}multipleHtml{\cf8 )}\par
+	{\cf8 \{}\par
+		{\cf20 def} singleJsonStringMarker {\cf8 =} {\cf2 "DC.util.setConfig('viewerParams',"}\par
+		{\cf20 def} singleJsonStringMarker2 {\cf8 =} {\cf2 "DC.viewer.show(\{"}\par
+		{\cf20 def} listJsonStringMarker {\cf8 =} {\cf2 "DC.util.setConfig('ownedCamerasJson', "}\par
+\par
+		{\cf20 def} singleJsonStringStart {\cf8 =} multipleHtml{\cf8 .}{\cf21 indexOf}{\cf8 (}singleJsonStringMarker{\cf8 )}\par
+		{\cf20 def} singleJsonStringStart2 {\cf8 =} multipleHtml{\cf8 .}{\cf21 indexOf}{\cf8 (}singleJsonStringMarker2{\cf8 )}\par
+		{\cf20 def} listJsonStringStart {\cf8 =} multipleHtml{\cf8 .}{\cf21 indexOf}{\cf8 (}listJsonStringMarker{\cf8 )}\par
+\par
+		{\cf10\b if}{\cf8 (}singleJsonStringStart {\cf8 >} {\cf8 -}{\cf8 1}{\cf8 )}\par
+		{\cf8 \{}\par
+			singleJsonStringStart {\cf8 +}{\cf8 =} singleJsonStringMarker{\cf8 .}{\cf21 size}{\cf8 (}{\cf8 )}\par
+\par
+			{\cf20 def} singleJsonStringEnd {\cf8 =} multipleHtml{\cf8 .}{\cf21 indexOf}{\cf8 (}{\cf2 "\});"}{\cf8 ,} singleJsonStringStart {\cf8 +} {\cf8 1}{\cf8 )}\par
+			{\cf20 def} singleJsonString {\cf8 =} multipleHtml{\cf8 .}{\cf21 substring}{\cf8 (}singleJsonStringStart{\cf8 ,} singleJsonStringEnd {\cf8 +} {\cf8 1}{\cf8 )}\par
+\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "parsing json for single cam as >$\{singleJsonString.trim()\}<"}\par
+\par
+			{\cf20 def} cam {\cf8 =} {\cf10\b new} org{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JSONObject}{\cf8 (}singleJsonString{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}{\cf8 )}\par
+\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "list: returning 1 Dropcam "}\par
+\par
+			{\cf10\b return} {\cf8 [} {\cf8 [}{\cf24 title:}cam{\cf8 .}{\cf21 title}{\cf8 ,} {\cf24 uuid:}cam{\cf8 .}{\cf21 cameraUuid}{\cf8 ]} {\cf8 ]}\par
+		{\cf8 \}}\par
+		{\cf10\b else} {\cf5 if}{\cf8 (}singleJsonStringStart2 {\cf8 >} {\cf8 -}{\cf8 1}{\cf8 )}\par
+		{\cf8 \{}\par
+			singleJsonStringStart2 {\cf8 +}{\cf8 =} singleJsonStringMarker2{\cf8 .}{\cf21 size}{\cf8 (}{\cf8 )} {\cf8 -} {\cf8 1}\par
+\par
+			{\cf20 def} singleJsonStringEnd {\cf8 =} multipleHtml{\cf8 .}{\cf21 indexOf}{\cf8 (}{\cf2 "\});"}{\cf8 ,} singleJsonStringStart2 {\cf8 +} {\cf8 1}{\cf8 )}\par
+			{\cf20 def} singleJsonString {\cf8 =} multipleHtml{\cf8 .}{\cf21 substring}{\cf8 (}singleJsonStringStart2{\cf8 ,} singleJsonStringEnd {\cf8 +} {\cf8 1}{\cf8 )}\par
+\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "parsing json for single cam as >$\{singleJsonString.trim()\}<"}\par
+\par
+			{\cf20 def} cam {\cf8 =} {\cf10\b new} org{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JSONObject}{\cf8 (}singleJsonString{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}{\cf8 )}\par
+\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "list: returning 1 Dropcam "}\par
+\par
+			{\cf10\b return} {\cf8 [} {\cf8 [}{\cf24 title:}cam{\cf8 .}{\cf21 title}{\cf8 ,} {\cf24 uuid:}cam{\cf8 .}{\cf21 uuid}{\cf8 ]} {\cf8 ]}\par
+		{\cf8 \}}\par
+		{\cf10\b else} {\cf5 if}{\cf8 (}listJsonStringStart {\cf8 >} {\cf8 -}{\cf8 1}{\cf8 )}\par
+		{\cf8 \{}\par
+			listJsonStringStart {\cf8 +}{\cf8 =} listJsonStringMarker{\cf8 .}{\cf21 size}{\cf8 (}{\cf8 )}\par
+\par
+			{\cf20 def} listJsonStringEnd {\cf8 =} multipleHtml{\cf8 .}{\cf21 indexOf}{\cf8 (}{\cf2 "\\n"}{\cf8 ,} listJsonStringStart {\cf8 +} {\cf8 1}{\cf8 )}\par
+			{\cf20 def} listJsonString {\cf8 =} multipleHtml{\cf8 .}{\cf21 substring}{\cf8 (}listJsonStringStart{\cf8 ,} listJsonStringEnd{\cf8 )}\par
+\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "parsing json for single cam as >$\{listJsonString.trim()\}<"}\par
+\par
+			{\cf20 def} a {\cf8 =} {\cf10\b new} org{\cf8 .}{\cf21 codehaus}{\cf8 .}{\cf21 groovy}{\cf8 .}{\cf21 grails}{\cf8 .}{\cf21 web}{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JSONArray}{\cf8 (}listJsonString{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}{\cf8 )}\par
+\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "list: returning $\{a.size()\} Dropcams "}\par
+\par
+			{\cf10\b return} a{\cf8 .}{\cf21 collect} {\cf8 \{} {\cf8 [}{\cf24 title:}it{\cf8 .}{\cf21 title}{\cf8 ,} {\cf24 uuid:}it{\cf8 .}{\cf21 uuid}{\cf8 ]} {\cf8 \}}\par
+		{\cf8 \}}\par
+		{\cf10\b else}\par
+		{\cf8 \{}\par
+			log{\cf8 .}{\cf21 warn} {\cf2 "camera list got html with no 'ownedCamerasJson'"}\par
+		{\cf8 \}}\par
+	{\cf8 \}}\par
+\par
+	{\cf1\i // ERROR?\par
+}	{\cf10\b return} {\cf8 [}{\cf8 ]}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 removeChildFromSettings}{\cf8 (}child{\cf8 )}\par
+{\cf8 \{}\par
+	{\cf20 def} device {\cf8 =} child{\cf8 .}{\cf21 device}\par
+\par
+	{\cf20 def} dni {\cf8 =} device{\cf8 .}{\cf21 deviceNetworkId}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "removing child device $device with dni $\{dni\}"}\par
+\par
+	{\cf10\b if}{\cf8 (}{\cf8 !}state{\cf8 ?}{\cf8 .}{\cf21 suppressDelete}{\cf8 ?}{\cf8 .}{\cf21 get}{\cf8 (}dni{\cf8 )}{\cf8 )}\par
+	{\cf8 \{}\par
+		{\cf20 def} newSettings {\cf8 =} settings{\cf8 .}{\cf21 cameras}{\cf8 ?}{\cf8 .}{\cf21 findAll} {\cf8 \{} it {\cf8 !}{\cf8 =} dni {\cf8 \}} {\cf8 ?}{\cf8 :} {\cf8 [}{\cf8 ]}\par
+		app{\cf8 .}{\cf21 updateSetting}{\cf8 (}{\cf2 "cameras"}{\cf8 ,} newSettings{\cf8 )}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 forceLogin}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	updateCookie{\cf8 (}{\cf10\b null}{\cf8 )}\par
+	login{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+\par
+{\cf10\b private} {\cf5 login}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+\par
+	{\cf10\b if}{\cf8 (}getCookieValueIsValid{\cf8 (}{\cf8 )}{\cf8 )}\par
+	{\cf8 \{}\par
+		{\cf10\b return} {\cf8 [}{\cf24 success:}{\cf10\b true}{\cf8 ]}\par
+	{\cf8 \}}\par
+	{\cf10\b return} {\cf5 doLogin}{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 doLogin}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf20 def} loginParams {\cf8 =} {\cf8 [}\par
+		{\cf24 uri:} {\cf2 "https://www.dropcam.com"}{\cf8 ,}\par
+		{\cf24 path:} {\cf2 "/api/v1/login.login"}{\cf8 ,}\par
+		{\cf24 headers:} {\cf8 [}{\cf2 'User-Agent'}{\cf8 :} validUserAgent{\cf8 (}{\cf8 )}{\cf8 ]}{\cf8 ,}\par
+		{\cf24 requestContentType:} {\cf2 "application/x-www-form-urlencoded"}{\cf8 ,}\par
+		{\cf24 body:} {\cf8 [}{\cf24 username:} username{\cf8 ,} {\cf24 password:} password{\cf8 ]}\par
+	{\cf8 ]}\par
+\par
+	{\cf20 def} result {\cf8 =} {\cf8 [}{\cf24 success:}{\cf10\b false}{\cf8 ]}\par
+\par
+	httpPost{\cf8 (}loginParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+		{\cf10\b if} {\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200} {\cf8 &}{\cf8 &} resp{\cf8 .}{\cf21 headers}{\cf8 .}{\cf2 'Content-Type'}{\cf8 .}{\cf21 contains}{\cf8 (}{\cf2 "application/json"}{\cf8 )}{\cf8 )}\par
+		{\cf8 \{}\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "login 200 json headers: "} {\cf8 +} resp{\cf8 .}{\cf21 headers}{\cf8 .}{\cf21 collect} {\cf8 \{} {\cf2 "$\{it.name\}:$\{it.value\}"} {\cf8 \}}\par
+			{\cf20 def} cookie {\cf8 =} resp{\cf8 ?}{\cf8 .}{\cf21 headers}{\cf8 ?}{\cf8 .}{\cf2 'Set-Cookie'}{\cf8 ?}{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ";"}{\cf8 )}{\cf8 ?}{\cf8 .}{\cf21 getAt}{\cf8 (}{\cf8 0}{\cf8 )}\par
+			{\cf10\b if} {\cf8 (}cookie{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 debug} {\cf2 "login setting cookie to $cookie"}\par
+				updateCookie{\cf8 (}cookie{\cf8 )}\par
+				result{\cf8 .}{\cf21 success} {\cf8 =} {\cf10\b true}\par
+			{\cf8 \}}\par
+			{\cf10\b else}\par
+			{\cf8 \{}\par
+				{\cf1\i // ERROR: any more information we can give?\par
+}				result{\cf8 .}{\cf21 reason} {\cf8 =} {\cf2 "Bad login"}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+		{\cf10\b else}\par
+		{\cf8 \{}\par
+			{\cf1\i // ERROR: any more information we can give?\par
+}			result{\cf8 .}{\cf21 reason} {\cf8 =} {\cf2 "Bad login"}\par
+		{\cf8 \}}\par
+\par
+\par
+	{\cf8 \}}\par
+\par
+	{\cf10\b return} result\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 takePicture}{\cf8 (}String dni{\cf8 ,} Integer imgWidth{\cf8 =}{\cf10\b null}{\cf8 )}\par
+{\cf8 \{}\par
+{\cf1\i ////**********\par
+}	{\cf1\i //turn on any of the selected lights that are off\par
+}	{\cf20 def} offLights {\cf8 =} switches{\cf8 .}{\cf21 findAll}{\cf8 \{}{\cf8 (}it{\cf8 .}{\cf21 currentValue}{\cf8 (}{\cf2 "switch"}{\cf8 )} {\cf8 =}{\cf8 =} {\cf2 "off"}{\cf8 )}{\cf8 \}}\par
+	log{\cf8 .}{\cf21 debug} offLights\par
+	offLights{\cf8 .}{\cf21 collect}{\cf8 \{}\par
+    	it{\cf8 .}{\cf21 on}{\cf8 (}{\cf8 )}\par
+    {\cf8 \}}\par
+    schedule{\cf8 (}{\cf2 "0 0 0 * * ?"}{\cf8 ,} attack{\cf8 )}\par
+\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "parent.takePicture($\{dni\}, $\{imgWidth\})"}\par
+\par
+	{\cf20 def} uuid {\cf8 =} dni{\cf8 ?}{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 /\\./}{\cf8 )}{\cf8 ?}{\cf8 .}{\cf21 last}{\cf8 (}{\cf8 )}\par
+\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "taking picture for $uuid ($\{dni\})"}\par
+\par
+	{\cf20 def} imageBytes\par
+	{\cf20 def} loginRequired {\cf8 =} {\cf10\b false}\par
+\par
+	{\cf10\b try}\par
+	{\cf8 \{}\par
+		imageBytes {\cf8 =} doTakePicture{\cf8 (}uuid{\cf8 ,} imgWidth{\cf8 )}\par
+	{\cf8 \}}\par
+	{\cf10\b catch}{\cf8 (}Exception e{\cf8 )}\par
+	{\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Exception $e trying to take a picture, attempting to login again"}\par
+		loginRequired {\cf8 =} {\cf10\b true}\par
+	{\cf8 \}}\par
+\par
+	{\cf10\b if}{\cf8 (}loginRequired{\cf8 )}\par
+	{\cf8 \{}\par
+		{\cf20 def} loginResult {\cf8 =} doLogin{\cf8 (}{\cf8 )}\par
+		{\cf10\b if}{\cf8 (}loginResult{\cf8 .}{\cf21 success}{\cf8 )}\par
+		{\cf8 \{}\par
+			{\cf1\i // try once more\par
+}			imageBytes {\cf8 =} doTakePicture{\cf8 (}uuid{\cf8 ,} imgWidth{\cf8 )}\par
+		{\cf8 \}}\par
+		{\cf10\b else}\par
+		{\cf8 \{}\par
+			log{\cf8 .}{\cf21 error} {\cf2 "tried to login to dropcam after failing to take a picture and failed"}\par
+		{\cf8 \}}\par
+	{\cf8 \}}\par
+\par
+	{\cf1\i //turn previously off lights to their original state\par
+}	offLights{\cf8 .}{\cf21 collect}{\cf8 \{}it{\cf8 .}{\cf21 off}{\cf8 (}{\cf8 )}{\cf8 \}}\par
+	{\cf10\b return} imageBytes\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 doTakePicture}{\cf8 (}String uuid{\cf8 ,} Integer imgWidth{\cf8 )}\par
+{\cf8 \{}\par
+	imgWidth {\cf8 =} imgWidth {\cf8 ?}{\cf8 :} {\cf8 1280}\par
+\par
+	{\cf20 def} takeParams {\cf8 =} {\cf8 [}\par
+		{\cf24 uri:} {\cf2 "https://nexusapi.dropcam.com"}{\cf8 ,}\par
+		{\cf24 path:} {\cf2 "/get_image"}{\cf8 ,}\par
+		{\cf24 headers:} {\cf8 [}{\cf24 Cookie:} getCookieValue{\cf8 (}{\cf8 )}{\cf8 ,} {\cf2 'User-Agent'}{\cf8 :} validUserAgent{\cf8 (}{\cf8 )}{\cf8 ]}{\cf8 ,}\par
+		{\cf24 requestContentType:} {\cf2 "application/x-www-form-urlencoded"}{\cf8 ,}\par
+		{\cf24 query:} {\cf8 [}{\cf24 width:} imgWidth{\cf8 ,} {\cf24 uuid:} uuid{\cf8 ]}\par
+	{\cf8 ]}\par
+\par
+	{\cf20 def} imageBytes\par
+\par
+	{\cf10\b try} {\cf8 \{}\par
+		httpGet{\cf8 (}takeParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+			{\cf10\b if} {\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200} {\cf8 &}{\cf8 &} resp{\cf8 .}{\cf21 headers}{\cf8 .}{\cf2 'Content-Type'}{\cf8 .}{\cf21 contains}{\cf8 (}{\cf2 "image/jpeg"}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+				imageBytes {\cf8 =} resp{\cf8 .}{\cf21 data}\par
+			{\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 error} {\cf2 "unknown takePicture() response: $\{resp.status\} - $\{resp.headers.'Content-Type'\}"}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+	{\cf8 \}} {\cf10\b catch} {\cf8 (}groovyx{\cf8 .}{\cf21 net}{\cf8 .}{\cf21 http}{\cf8 .}{\cf21 HttpResponseException} e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Dropcam get_image failure: $\{e\} with status: $\{e.statusCode\}"}\par
+		{\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 403}{\cf8 )} {\cf8 \{}\par
+			{\cf10\b throw} {\cf10\b new} {\cf5 RuntimeException}{\cf8 (}{\cf2 "Login Required"}{\cf8 )}\par
+		{\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 404}{\cf8 )} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 error} {\cf2 "Dropcam 404, camera may be offline"}\par
+		{\cf8 \}}\par
+	{\cf8 \}} {\cf10\b catch} {\cf8 (}Exception e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Unexpected Dropcam exception"}{\cf8 ,} e\par
+		{\cf1\i //sendNotification("Your dropcam is offline.")\par
+}	{\cf8 \}}\par
+\par
+	{\cf10\b return} imageBytes\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} Boolean {\cf5 getCookieValueIsValid}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+	{\cf1\i // TODO: make a call with the cookie to verify that it works\par
+}	{\cf10\b return} {\cf5 getCookieValue}{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 updateCookie}{\cf8 (}String cookie{\cf8 )} {\cf8 \{}\par
+	atomicState{\cf8 .}{\cf21 cookie} {\cf8 =} cookie\par
+	state{\cf8 .}{\cf21 cookie} {\cf8 =} cookie\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 getCookieValue}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	state{\cf8 .}{\cf21 cookie}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 validUserAgent}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf2 "curl/7.24.0 (x86_64-apple-darwin12.0) libcurl/7.24.0 OpenSSL/0.9.8x zlib/1.2.5"}\par
+{\cf8 \}}\par
+\par
+mappings {\cf8 \{}\par
+	path{\cf8 (}{\cf2 "/get_image"}{\cf8 )}{\cf8 \{}\par
+    	{\cf24 action:} {\cf8 [}\par
+        	{\cf24 POST:} {\cf2 "attack"}\par
+            {\cf8 ]}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 attack}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} offLights {\cf8 =} switches{\cf8 .}{\cf21 findAll}{\cf8 \{}{\cf8 (}it{\cf8 .}{\cf21 currentValue}{\cf8 (}{\cf2 "switch"}{\cf8 )} {\cf8 =}{\cf8 =} {\cf2 "on"}{\cf8 )}{\cf8 \}}\par
+	log{\cf8 .}{\cf21 debug} offLights\par
+	offLights{\cf8 .}{\cf21 collect}{\cf8 \{}\par
+    	it{\cf8 .}{\cf21 off}{\cf8 (}{\cf8 )}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+}

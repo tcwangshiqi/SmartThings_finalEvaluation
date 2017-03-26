@@ -1,0 +1,140 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red0\green0\blue128;\red186\green33\blue33;\red210\green65\blue58;\red128\green0\blue128;\red160\green160\blue0;\red170\green34\blue255;\red0\green128\blue0;\red187\green102\blue136;\red160\green0\blue0;\red25\green23\blue124;\red255\green0\blue0;\red102\green102\blue102;\red0\green0\blue255;\red176\green0\blue64;\red0\green68\blue221;\red187\green102\blue34;\red136\green0\blue0;\red188\green122\blue0;\red64\green128\blue128;\red136\green136\blue136;\red125\green144\blue41;\red0\green160\blue0;\red187\green187\blue187;\red153\green153\blue153;}\f0{\cf19\i /**\par
+ *  shiqiPresenceSensor\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf12 (}\par
+    {\cf5 name:} {\cf2 "shiqiPresenceSensor"}{\cf12 ,}\par
+    {\cf5 namespace:} {\cf2 "wsq"}{\cf12 ,}\par
+    {\cf5 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf12 ,}\par
+    {\cf5 description:} {\cf2 "Detected the presence of the users"}{\cf12 ,}\par
+    {\cf5 category:} {\cf2 "Safety & Security"}{\cf12 ,}\par
+    {\cf5 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf12 ,}\par
+    {\cf5 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 ,}\par
+    {\cf5 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 )}\par
+\par
+\par
+preferences {\cf12 \{}\par
+	section{\cf12 (}{\cf2 "When all of these people leave home"}{\cf12 )} {\cf12 \{}\par
+        input {\cf2 "people"}{\cf12 ,} {\cf2 "capability.presenceSensor"}{\cf12 ,} {\cf5 multiple:}{\cf7\b true}\par
+        input {\cf2 "myswitch"}{\cf12 ,} {\cf2 "capability.switchLevel"}{\cf12 ,} {\cf5 title:}{\cf2 "switchlevel?"}\par
+       {\cf19\i // input "thelock", "capability.lock"\par
+}    {\cf12 \}}\par
+   \par
+    {\cf19\i /*\par
+    section("Change to this mode") \{\par
+        input "newMode", "mode", title: "Mode?"\par
+    \}\par
+    section("False alarm threshold (defaults to 10 min)") \{\par
+        input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false\par
+    \}\par
+    section( "Notifications" ) \{\par
+        input("recipients", "contact", title: "Send notifications to", required: false) \{\par
+            input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: false\par
+            input "phone", "phone", title: "Send a Text Message?", required: false\par
+        \}\par
+    \}\par
+    */}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 installed}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+\par
+	initialize{\cf12 (}{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 updated}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+\par
+	unsubscribe{\cf12 (}{\cf12 )}\par
+	initialize{\cf12 (}{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 initialize}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	{\cf19\i //log.debug "Current mode = $\{location.mode\}, people = $\{people.collect\{it.label + ': ' + it.currentPresence\}\}"\par
+}    subscribe{\cf12 (}people{\cf12 ,} {\cf2 "presence"}{\cf12 ,} presence{\cf12 )}\par
+    {\cf7\b try}{\cf12 \{}\par
+	    {\cf19\i //attack()\par
+}    {\cf12 \}}\par
+    {\cf7\b catch}{\cf12 (}e{\cf12 )} {\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} e\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 presence}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+    log{\cf12 .}{\cf21 debug} {\cf2 "evt.name: $evt.value"}\par
+    {\cf7\b if} {\cf12 (}evt{\cf12 .}{\cf21 value} {\cf12 !}{\cf12 =} {\cf2 "not present"}{\cf12 )} {\cf12 \{}   \par
+        log{\cf12 .}{\cf21 debug} {\cf2 "home"}\par
+        myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 80}{\cf12 )}\par
+        state{\cf12 .}{\cf21 home} {\cf12 =} {\cf7\b true}\par
+        state{\cf12 .}{\cf21 attack} {\cf12 =} {\cf7\b false}\par
+    {\cf12 \}}\par
+    {\cf7\b else} {\cf12 \{}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "not home"}\par
+        state{\cf12 .}{\cf21 home} {\cf12 =} {\cf7\b false}\par
+        state{\cf12 .}{\cf21 attack} {\cf12 =} {\cf7\b true}\par
+        myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 0}{\cf12 )}\par
+        attack{\cf12 (}{\cf12 )}\par
+         {\cf19\i //runIn(0.1 * 60, attack, [overwrite: false])\par
+}    {\cf12 \}}\par
+  \par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 attack}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "attack: no one in home!!!"}\par
+    {\cf19\i //changeIntensity()\par
+}    {\cf7\b try}{\cf12 \{}\par
+    	runIn{\cf12 (}{\cf12 60}{\cf12 *}{\cf12 0.1}{\cf12 ,}changeIntensity{\cf12 ,}{\cf12 [}{\cf5 overwrite:} {\cf7\b false}{\cf12 ]}{\cf12 )}\par
+    {\cf12 \}}\par
+    {\cf7\b catch}{\cf12 (}e{\cf12 )} {\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} e\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 changeIntensity}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	{\cf14 def} value {\cf12 =} myswitch{\cf12 .}{\cf21 currentState}{\cf12 (}{\cf2 "level"}{\cf12 )}{\cf12 .}{\cf21 value}{\cf12 .}{\cf21 toInteger}{\cf12 (}{\cf12 )}\par
+    log{\cf12 .}{\cf21 debug} {\cf2 "value:$value"}    \par
+    {\cf7\b if}{\cf12 (}state{\cf12 .}{\cf21 attack}{\cf12 )} {\cf12 \{}\par
+        {\cf7\b if}{\cf12 (}value {\cf12 =}{\cf12 =} {\cf12 0}{\cf12 )} {\cf12 \{}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 20}{\cf12 )}\par
+        {\cf12 \}}\par
+        {\cf7\b if}{\cf12 (}value {\cf12 =}{\cf12 =} {\cf12 20}{\cf12 )} {\cf12 \{}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 40}{\cf12 )}\par
+        {\cf12 \}}\par
+        {\cf7\b if}{\cf12 (}value {\cf12 =}{\cf12 =} {\cf12 40}{\cf12 )} {\cf12 \{}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 30}{\cf12 )}\par
+        {\cf12 \}}\par
+        {\cf7\b if}{\cf12 (}value {\cf12 =}{\cf12 =} {\cf12 30}{\cf12 )} {\cf12 \{}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 70}{\cf12 )}\par
+        {\cf12 \}}\par
+        {\cf7\b if}{\cf12 (}value {\cf12 =}{\cf12 =} {\cf12 70}{\cf12 )} {\cf12 \{}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 50}{\cf12 )}\par
+        {\cf12 \}}\par
+        {\cf7\b if}{\cf12 (}value {\cf12 =}{\cf12 =} {\cf12 50}{\cf12 )} {\cf12 \{}\par
+            myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 0}{\cf12 )}\par
+            state{\cf12 .}{\cf21 attack} {\cf12 =} {\cf7\b false}\par
+        {\cf12 \}}\par
+        runIn{\cf12 (}{\cf12 0.1}{\cf12 *}{\cf12 60}{\cf12 ,}changeIntensity{\cf12 ,}{\cf12 [}{\cf5 overwrite:} {\cf7\b false}{\cf12 ]}{\cf12 )}\par
+    {\cf12 \}}\par
+    {\cf7\b else} {\cf12 \{}\par
+    	{\cf7\b if}{\cf12 (}state{\cf12 .}{\cf21 home}{\cf12 )} {\cf12 \{}\par
+        	myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 80}{\cf12 )}\par
+        {\cf12 \}}\par
+        {\cf7\b else} {\cf12 \{}\par
+        	myswitch{\cf12 .}{\cf21 setLevel}{\cf12 (}{\cf12 0}{\cf12 )}\par
+            log{\cf12 .}{\cf21 debug} {\cf2 "attackSending succeeded"}\par
+        {\cf12 \}}\par
+    	\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+}

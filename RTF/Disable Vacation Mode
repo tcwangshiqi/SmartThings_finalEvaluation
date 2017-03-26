@@ -1,0 +1,142 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red0\green0\blue128;\red186\green33\blue33;\red210\green65\blue58;\red128\green0\blue128;\red160\green160\blue0;\red170\green34\blue255;\red0\green128\blue0;\red187\green102\blue136;\red160\green0\blue0;\red25\green23\blue124;\red255\green0\blue0;\red102\green102\blue102;\red0\green0\blue255;\red176\green0\blue64;\red0\green68\blue221;\red187\green102\blue34;\red136\green0\blue0;\red188\green122\blue0;\red64\green128\blue128;\red136\green136\blue136;\red125\green144\blue41;\red0\green160\blue0;\red187\green187\blue187;\red153\green153\blue153;}\f0{\cf19\i /**\par
+ *  shiqiVacationMode\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf12 (}\par
+    {\cf5 name:} {\cf2 "shiqiVacationMode"}{\cf12 ,}\par
+    {\cf5 namespace:} {\cf2 "wsq"}{\cf12 ,}\par
+    {\cf5 author:} {\cf2 "Yunhan Jia &amp; Shiqi Wang"}{\cf12 ,}\par
+    {\cf5 description:} {\cf2 "The smartApp could detect the presence of the user and changes the mode of the user. At the same time, when the user leaves home, it could change to the vacation mode to open the light at certain time."}{\cf12 ,}\par
+    {\cf5 category:} {\cf2 "Safety & Security"}{\cf12 ,}\par
+    {\cf5 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf12 ,}\par
+    {\cf5 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 ,}\par
+    {\cf5 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf12 )}\par
+\par
+\par
+preferences {\cf12 \{}\par
+	section{\cf12 (}{\cf2 "When all of these people leave home"}{\cf12 )} {\cf12 \{}\par
+		input {\cf2 "people"}{\cf12 ,} {\cf2 "capability.presenceSensor"}{\cf12 ,} {\cf5 multiple:} {\cf7\b true}\par
+	{\cf12 \}}\par
+	section{\cf12 (}{\cf2 "Change to this mode"}{\cf12 )} {\cf12 \{}\par
+		input {\cf2 "newMode"}{\cf12 ,} {\cf2 "mode"}{\cf12 ,} {\cf5 title:} {\cf2 "Mode?"}\par
+	{\cf12 \}}\par
+    section{\cf12 (}{\cf2 "vacation mode"}{\cf12 )} {\cf12 \{}\par
+    	input {\cf2 "myswitch"}{\cf12 ,}{\cf2 "capability.switch"}{\cf12 ,} {\cf5 title:}{\cf2 "vacation mode?"}\par
+		input {\cf2 "light"}{\cf12 ,} {\cf2 "capability.switch"}{\cf12 ,} {\cf5 title:} {\cf2 "light?"}\par
+	{\cf12 \}}\par
+	section{\cf12 (}{\cf2 "And text me at (optional)"}{\cf12 )} {\cf12 \{}\par
+		input {\cf2 "phone"}{\cf12 ,} {\cf2 "phone"}{\cf12 ,} {\cf5 title:} {\cf2 "Phone number?"}{\cf12 ,} {\cf5 required:} {\cf7\b false}\par
+	{\cf12 \}}\par
+	section{\cf12 (}{\cf2 "False alarm threshold (defaults to 10 min)"}{\cf12 )} {\cf12 \{}\par
+		input {\cf2 "falseAlarmThreshold"}{\cf12 ,} {\cf2 "decimal"}{\cf12 ,} {\cf5 title:} {\cf2 "Number of minutes"}{\cf12 ,} {\cf5 required:} {\cf7\b false}\par
+	{\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 installed}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Current mode = $\{location.mode\}, people = $\{people.collect\{it.label + ': ' + it.currentPresence\}\}"}\par
+	subscribe{\cf12 (}people{\cf12 ,} {\cf2 "presence"}{\cf12 ,} presence{\cf12 )}\par
+    subscribe{\cf12 (}myswitch{\cf12 ,}{\cf2 "switch"}{\cf12 ,} switchHandler{\cf12 )}\par
+    subscribe{\cf12 (}location{\cf12 ,} {\cf2 "sunset"}{\cf12 ,} sunsetHandler{\cf12 )}\par
+    subscribe{\cf12 (}location{\cf12 ,} {\cf2 "sunrise"}{\cf12 ,} sunriseHandler{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 updated}{\cf12 (}{\cf12 )} {\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "Current mode = $\{location.mode\}, people = $\{people.collect\{it.label + ': ' + it.currentPresence\}\}"}\par
+	unsubscribe{\cf12 (}{\cf12 )}\par
+	subscribe{\cf12 (}people{\cf12 ,} {\cf2 "presence"}{\cf12 ,} presence{\cf12 )}\par
+    subscribe{\cf12 (}myswitch{\cf12 ,}{\cf2 "switch"}{\cf12 ,} switchHandler{\cf12 )}\par
+    subscribe{\cf12 (}location{\cf12 ,} {\cf2 "sunset"}{\cf12 ,} sunsetHandler{\cf12 )}\par
+    subscribe{\cf12 (}location{\cf12 ,} {\cf2 "sunrise"}{\cf12 ,} sunriseHandler{\cf12 )}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 switchHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+	{\cf7\b if}{\cf12 (}evt{\cf12 .}{\cf21 value} {\cf12 =}{\cf12 =} {\cf2 "on"}{\cf12 )} {\cf12 \{}\par
+    	state{\cf12 .}{\cf21 vacation} {\cf12 =} {\cf7\b true}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "vacation mode set"}\par
+    {\cf12 \}}\par
+    {\cf7\b else} {\cf12 \{}\par
+    	state{\cf12 .}{\cf21 vacation} {\cf12 =} {\cf7\b false}\par
+        log{\cf12 .}{\cf21 debug} {\cf2 "vacation mode cancel"}\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 presence}{\cf12 (}evt{\cf12 )}\par
+{\cf12 \{}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "evt.name: $evt.value"}\par
+	{\cf7\b if} {\cf12 (}evt{\cf12 .}{\cf21 value} {\cf12 =}{\cf12 =} {\cf2 "not present"}{\cf12 )} {\cf12 \{}\par
+		{\cf7\b if} {\cf12 (}location{\cf12 .}{\cf21 mode} {\cf12 !}{\cf12 =} newMode{\cf12 )} {\cf12 \{}\par
+			log{\cf12 .}{\cf21 debug} {\cf2 "checking if everyone is away"}\par
+			{\cf7\b if} {\cf12 (}everyoneIsAway{\cf12 (}{\cf12 )}{\cf12 )} {\cf12 \{}\par
+				log{\cf12 .}{\cf21 debug} {\cf2 "starting sequence"}\par
+                {\cf19\i //attack()\par
+}				{\cf14 def} delay {\cf12 =} falseAlarmThreshold {\cf12 !}{\cf12 =} {\cf7\b null} {\cf12 ?} falseAlarmThreshold {\cf12 *} {\cf12 60} {\cf12 :} {\cf12 10} {\cf12 *} {\cf12 60}\par
+				runIn{\cf12 (}delay{\cf12 ,} {\cf2 "takeAction"}{\cf12 )}\par
+			{\cf12 \}}\par
+		{\cf12 \}}\par
+		{\cf7\b else} {\cf12 \{}\par
+			log{\cf12 .}{\cf21 debug} {\cf2 "mode is the same, not evaluating"}\par
+            state{\cf12 .}{\cf21 home} {\cf12 =} {\cf7\b true}\par
+		{\cf12 \}}\par
+	{\cf12 \}}\par
+	{\cf7\b else} {\cf12 \{}\par
+		log{\cf12 .}{\cf21 debug} {\cf2 "canceling"}\par
+		unschedule{\cf12 (}{\cf2 "takeAction"}{\cf12 )}\par
+        state{\cf12 .}{\cf21 home} {\cf12 =} {\cf7\b true}\par
+	{\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 takeAction}{\cf12 (}{\cf12 )}\par
+{\cf12 \{}\par
+	{\cf19\i // TODO -- uncomment when app label is available\par
+}	{\cf19\i //def message = "$\{app.label\} changed your mode to '$\{newMode\}' because everyone left home"\par
+}	{\cf14 def} message {\cf12 =} {\cf2 "SmartThings changed your mode to '$\{newMode\}' because everyone left home"}\par
+	log{\cf12 .}{\cf21 info} message\par
+	{\cf13 sendPush}{\cf12 (}message{\cf12 )}\par
+	{\cf7\b if} {\cf12 (}phone{\cf12 )} {\cf12 \{}\par
+		sendSms{\cf12 (}phone{\cf12 ,} message{\cf12 )}\par
+	{\cf12 \}}\par
+    state{\cf12 .}{\cf21 home} {\cf12 =} {\cf7\b false}\par
+	setLocationMode{\cf12 (}newMode{\cf12 )}\par
+	unschedule{\cf12 (}{\cf2 "takeAction"}{\cf12 )} {\cf19\i // Temporary work-around to scheduling bug\par
+}{\cf12 \}}\par
+\par
+{\cf7\b private} {\cf13 everyoneIsAway}{\cf12 (}{\cf12 )}\par
+{\cf12 \{}\par
+	{\cf14 def} result {\cf12 =} {\cf7\b true}\par
+	{\cf7\b for} {\cf12 (}person {\cf7\b in} people{\cf12 )} {\cf12 \{}\par
+		{\cf7\b if} {\cf12 (}person{\cf12 .}{\cf21 currentPresence} {\cf12 =}{\cf12 =} {\cf2 "present"}{\cf12 )} {\cf12 \{}\par
+			result {\cf12 =} {\cf7\b false}\par
+			{\cf7\b break}\par
+		{\cf12 \}}\par
+	{\cf12 \}}\par
+	log{\cf12 .}{\cf21 debug} {\cf2 "everyoneIsAway: $result"}\par
+	{\cf7\b return} result\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 sunsetHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+	{\cf7\b if}{\cf12 (}state{\cf12 .}{\cf21 vacation}{\cf12 &}{\cf12 &}{\cf12 !}state{\cf12 .}{\cf21 home}{\cf12 )} {\cf12 \{}{\cf19\i //not home and vacation mode on\par
+}    	log{\cf12 .}{\cf21 debug} {\cf2 "sunset&vacation:close the light!"}\par
+        light{\cf12 .}{\cf21 off}{\cf12 (}{\cf12 )}\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+\par
+{\cf14 def} {\cf13 sunriseHandler}{\cf12 (}evt{\cf12 )} {\cf12 \{}\par
+	{\cf7\b if}{\cf12 (}state{\cf12 .}{\cf21 vacation}{\cf12 &}{\cf12 &}{\cf12 !}state{\cf12 .}{\cf21 home}{\cf12 )} {\cf12 \{}\par
+    	log{\cf12 .}{\cf21 debug} {\cf2 "sunrise&vacation:open the light!"}\par
+        light{\cf12 .}{\cf21 on}{\cf12 (}{\cf12 )}\par
+    {\cf12 \}}\par
+{\cf12 \}}\par
+}

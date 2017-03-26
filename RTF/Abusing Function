@@ -1,0 +1,107 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiBatteryMonitor\par
+ *\par
+ *  Copyright 2016 Yunhan Jia & Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiBatteryMonitor"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "The bettery monitor could supervise the battery of your door. And when the bettery is low, it would send the report to you."}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+\par
+\par
+preferences {\cf8 \{}\par
+	section{\cf8 (}{\cf2 "Title"}{\cf8 )} {\cf8 \{}\par
+		 input {\cf2 "thebatterymo"}{\cf8 ,} {\cf2 "capability.battery"}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 title:} {\cf2 "Where?"}\par
+         input {\cf2 "themotionsensor"}{\cf8 ,} {\cf2 "capability.motionSensor"}{\cf8 ,} {\cf24 title:} {\cf2 "Where?"}\par
+         input {\cf2 "minutes"}{\cf8 ,} {\cf2 "number"}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 title:} {\cf2 "Minutes to lock the door?"}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 installed}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+\par
+	initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 updated}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+\par
+	unsubscribe{\cf8 (}{\cf8 )}\par
+	initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 initialize}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+ 	subscribe{\cf8 (}themotionsensor{\cf8 ,} {\cf2 "motion.active"}{\cf8 ,} motionDetectedHandler{\cf8 )}\par
+    subscribe{\cf8 (}themotionsensor{\cf8 ,} {\cf2 "motion.inactive"}{\cf8 ,} motionStoppedHandler{\cf8 )}\par
+	{\cf20 def} batteryValue {\cf8 =} thebatterymo{\cf8 .}{\cf21 latestValue}{\cf8 (}{\cf2 "battery"}{\cf8 )}\par
+  	log{\cf8 .}{\cf21 debug} {\cf2 "latest battery value: $batteryValue"}\par
+  	subscribe{\cf8 (}thebatterymo{\cf8 ,} {\cf2 "battery"}{\cf8 ,} batteryHandler{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 batteryHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  	log{\cf8 .}{\cf21 debug} {\cf2 "battery attribute changed to $\{evt.value\}"}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 motionDetectedHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+	 state{\cf8 .}{\cf21 motionDetected} {\cf8 =} {\cf10\b true}\par
+     log{\cf8 .}{\cf21 debug} {\cf2 "motionDetectedHandler called--home!!!"}\par
+     {\cf10\b if}{\cf8 (}state{\cf8 .}{\cf21 attack} {\cf8 =}{\cf8 =} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+     	thebatterymo{\cf8 .}{\cf21 lock}{\cf8 (}{\cf8 )}\par
+        state{\cf8 .}{\cf21 attack} {\cf8 =} {\cf10\b false}\par
+     {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 motionStoppedHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "motionStoppedHandler called"}\par
+    runIn{\cf8 (}{\cf8 60} {\cf8 *} minutes{\cf8 ,} checkMotion{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 checkMotion}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "In checkMotion scheduled method"}\par
+\par
+    {\cf20 def} motionState {\cf8 =} themotionsensor{\cf8 .}{\cf21 currentState}{\cf8 (}{\cf2 "motion"}{\cf8 )}\par
+\par
+    {\cf10\b if} {\cf8 (}motionState{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "inactive"}{\cf8 )} {\cf8 \{}\par
+        {\cf1\i // get the time elapsed between now and when the motion reported inactive\par
+}        {\cf20 def} elapsed {\cf8 =} now{\cf8 (}{\cf8 )} {\cf8 -} motionState{\cf8 .}{\cf21 date}{\cf8 .}{\cf21 time}\par
+\par
+        {\cf1\i // elapsed time is in milliseconds, so the threshold must be converted to milliseconds too\par
+}        {\cf20 def} threshold {\cf8 =} {\cf8 1000} {\cf8 *} {\cf8 60} {\cf8 *} {\cf8 (}minutes{\cf8 -}{\cf8 0.1}{\cf8 )}\par
+\par
+        {\cf10\b if} {\cf8 (}elapsed {\cf8 >}{\cf8 =} threshold{\cf8 )} {\cf8 \{}\par
+            log{\cf8 .}{\cf21 debug} {\cf2 " ($elapsed ms):  not home!!!"}\par
+            state{\cf8 .}{\cf21 motionDetected} {\cf8 =} {\cf10\b false}\par
+            attackFunction{\cf8 (}{\cf8 )}\par
+        {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+            log{\cf8 .}{\cf21 debug} {\cf2 "still home"}\par
+        {\cf8 \}}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        {\cf1\i // Motion active; just log it and do nothing\par
+}        log{\cf8 .}{\cf21 debug} {\cf2 "Home"}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+\par
+{\cf20 def} {\cf5 attackFunction}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	state{\cf8 .}{\cf21 attack} {\cf8 =} {\cf10\b true}\par
+	{\cf20 def} lockState {\cf8 =} thebatterymo{\cf8 .}{\cf21 currentState}{\cf8 (}{\cf2 "lock"}{\cf8 )}{\cf8 .}{\cf21 value}\par
+    {\cf10\b if}{\cf8 (}lockState {\cf8 =}{\cf8 =} {\cf2 "locked"}{\cf8 )} {\cf8 \{}\par
+    	thebatterymo{\cf8 .}{\cf21 unlock}{\cf8 (}{\cf8 )}\par
+    {\cf8 \}}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "attack unlock the door"}\par
+{\cf8 \}}\par
+}

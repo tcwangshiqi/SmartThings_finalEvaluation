@@ -1,0 +1,324 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiHelloHome\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiHelloHome"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "Monitor a set of presence sensors and activate Hello, Home phrases based on whether your home is empty or occupied.  Each presence status change will check against the current &#39;sun state&#39; to run phrases based on occupancy and whether the sun is up or down."}{\cf8 ,}\par
+    {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+\par
+\par
+preferences {\cf8 \{}\par
+  page{\cf8 (}{\cf24 name:} {\cf2 "selectPhrases"}{\cf8 )}\par
+  page{\cf8 (} {\cf24 name:}{\cf2 "Settings"}{\cf8 ,} {\cf24 title:}{\cf2 "Settings"}{\cf8 ,} {\cf24 uninstall:}{\cf10\b true}{\cf8 ,} {\cf24 install:}{\cf10\b true} {\cf8 )} {\cf8 \{}\par
+  	section{\cf8 (}{\cf2 "False alarm threshold (defaults to 10 min)"}{\cf8 )} {\cf8 \{}\par
+	input {\cf2 "falseAlarmThreshold"}{\cf8 ,} {\cf2 "decimal"}{\cf8 ,} {\cf24 title:} {\cf2 "Number of minutes"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+  	{\cf8 \}}\par
+\par
+  	section{\cf8 (}{\cf2 "Zip code"}{\cf8 )} {\cf8 \{}\par
+   		input {\cf2 "zip"}{\cf8 ,} {\cf2 "text"}{\cf8 ,} {\cf24 required:} {\cf10\b true}\par
+  	{\cf8 \}}\par
+\par
+  section{\cf8 (}{\cf2 "Notifications"}{\cf8 )} {\cf8 \{}\par
+input {\cf2 "sendPushMessage"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Send a push notification when the house is empty?"}{\cf8 ,} {\cf24 metadata:}{\cf8 [}{\cf24 values:}{\cf8 [}{\cf2 "Yes"}{\cf8 ,}{\cf2 "No"}{\cf8 ]}{\cf8 ]}{\cf8 ,} {\cf24 required:}{\cf10\b false}\par
+input {\cf2 "sendPushMessageHome"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Send a push notification when the house is occupied?"}{\cf8 ,} {\cf24 metadata:}{\cf8 [}{\cf24 values:}{\cf8 [}{\cf2 "Yes"}{\cf8 ,}{\cf2 "No"}{\cf8 ]}{\cf8 ]}{\cf8 ,} {\cf24 required:}{\cf10\b false}\par
+  	{\cf8 \}}\par
+\par
+section{\cf8 (}{\cf24 title:} {\cf2 "More options"}{\cf8 ,} {\cf24 hidden:} hideOptionsSection{\cf8 (}{\cf8 )}{\cf8 ,} {\cf24 hideable:} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+		label {\cf24 title:} {\cf2 "Assign a name"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+			input {\cf2 "days"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Only on certain days of the week"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,}\par
+				{\cf24 options:} {\cf8 [}{\cf2 "Monday"}{\cf8 ,} {\cf2 "Tuesday"}{\cf8 ,} {\cf2 "Wednesday"}{\cf8 ,} {\cf2 "Thursday"}{\cf8 ,} {\cf2 "Friday"}{\cf8 ,} {\cf2 "Saturday"}{\cf8 ,} {\cf2 "Sunday"}{\cf8 ]}\par
+			input {\cf2 "modes"}{\cf8 ,} {\cf2 "mode"}{\cf8 ,} {\cf24 title:} {\cf2 "Only when mode is"}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+		{\cf8 \}}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 selectPhrases}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf20 def} configured {\cf8 =} {\cf8 (}settings{\cf8 .}{\cf21 awayDay} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf21 awayNight} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf21 homeDay} {\cf8 &}{\cf8 &} settings{\cf8 .}{\cf21 homeNight}{\cf8 )}\par
+dynamicPage{\cf8 (}{\cf24 name:} {\cf2 "selectPhrases"}{\cf8 ,} {\cf24 title:} {\cf2 "Configure"}{\cf8 ,} {\cf24 nextPage:}{\cf2 "Settings"}{\cf8 ,} {\cf24 uninstall:} {\cf10\b true}{\cf8 )} {\cf8 \{}		\par
+		section{\cf8 (}{\cf2 "Who?"}{\cf8 )} {\cf8 \{}\par
+			input {\cf2 "people"}{\cf8 ,} {\cf2 "capability.presenceSensor"}{\cf8 ,} {\cf24 title:} {\cf2 "Monitor the presences"}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 multiple:} {\cf10\b true}{\cf8 ,}  {\cf24 refreshAfterSelection:}{\cf10\b false}\par
+		{\cf8 \}}\par
+\par
+		{\cf20 def} phrases {\cf8 =} location{\cf8 .}{\cf21 helloHome}{\cf8 ?}{\cf8 .}{\cf21 getPhrases}{\cf8 (}{\cf8 )}{\cf8 *}{\cf8 .}{\cf21 label}\par
+		{\cf10\b if} {\cf8 (}phrases{\cf8 )} {\cf8 \{}\par
+	phrases{\cf8 .}{\cf21 sort}{\cf8 (}{\cf8 )}\par
+			section{\cf8 (}{\cf2 "Run This Phrase When..."}{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 trace} phrases\par
+				input {\cf2 "awayDay"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Everyone is away and it's day."}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 options:} phrases{\cf8 ,}  {\cf24 refreshAfterSelection:}{\cf10\b false}\par
+				input {\cf2 "awayNight"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Everyone is away and it's night."}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 options:} phrases{\cf8 ,}  {\cf24 refreshAfterSelection:}{\cf10\b false}\par
+input {\cf2 "homeDay"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "At least one person is home and it's day."}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 options:} phrases{\cf8 ,}  {\cf24 refreshAfterSelection:}{\cf10\b false}\par
+input {\cf2 "homeNight"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "At least one person is home and it's night."}{\cf8 ,} {\cf24 required:} {\cf10\b true}{\cf8 ,} {\cf24 options:} phrases{\cf8 ,}  {\cf24 refreshAfterSelection:}{\cf10\b false}\par
+			{\cf8 \}}\par
+section{\cf8 (}{\cf2 "Select modes used for each condition. (Needed for better app logic)"}{\cf8 )} {\cf8 \{}\par
+input {\cf2 "homeModeDay"}{\cf8 ,} {\cf2 "mode"}{\cf8 ,} {\cf24 title:} {\cf2 "Select mode used for the 'Home Day' phrase"}{\cf8 ,} {\cf24 required:} {\cf10\b true}\par
+input {\cf2 "homeModeNight"}{\cf8 ,} {\cf2 "mode"}{\cf8 ,} {\cf24 title:} {\cf2 "Select mode used for the 'Home Night' phrase"}{\cf8 ,} {\cf24 required:} {\cf10\b true}\par
+  	{\cf8 \}}\par
+		{\cf8 \}}\par
+{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 installed}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  initialize{\cf8 (}{\cf8 )}\par
+\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 updated}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  unsubscribe{\cf8 (}{\cf8 )}\par
+  initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+\par
+{\cf20 def} {\cf5 initialize}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	subscribe{\cf8 (}people{\cf8 ,} {\cf2 "presence"}{\cf8 ,} presence{\cf8 )}\par
+runIn{\cf8 (}{\cf8 60}{\cf8 ,} checkSun{\cf8 )}\par
+	subscribe{\cf8 (}location{\cf8 ,} {\cf2 "sunrise"}{\cf8 ,} setSunrise{\cf8 )}\par
+	subscribe{\cf8 (}location{\cf8 ,} {\cf2 "sunset"}{\cf8 ,} setSunset{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf1\i //check current sun state when installed.\par
+}{\cf20 def} {\cf5 checkSun}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} zip {\cf8 =} settings{\cf8 .}{\cf21 zip} {\cf10\b as} String\par
+  {\cf20 def} sunInfo {\cf8 =} getSunriseAndSunset{\cf8 (}{\cf24 zipCode:} zip{\cf8 )}\par
+ {\cf20 def} current {\cf8 =} now{\cf8 (}{\cf8 )}\par
+\par
+{\cf10\b if} {\cf8 (}sunInfo{\cf8 .}{\cf21 sunrise}{\cf8 .}{\cf21 time} {\cf8 <} current {\cf8 &}{\cf8 &} sunInfo{\cf8 .}{\cf21 sunset}{\cf8 .}{\cf21 time} {\cf8 >} current{\cf8 )} {\cf8 \{}\par
+state{\cf8 .}{\cf21 sunMode} {\cf8 =} {\cf2 "sunrise"}\par
+   setSunrise{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+  \par
+{\cf10\b else} {\cf8 \{}\par
+   state{\cf8 .}{\cf21 sunMode} {\cf8 =} {\cf2 "sunset"}\par
+setSunset{\cf8 (}{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf1\i //change to sunrise mode on sunrise event\par
+}{\cf20 def} {\cf5 setSunrise}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  state{\cf8 .}{\cf21 sunMode} {\cf8 =} {\cf2 "sunrise"}{\cf8 ;}\par
+  changeSunMode{\cf8 (}newMode{\cf8 )}{\cf8 ;}\par
+{\cf8 \}}\par
+\par
+{\cf1\i //change to sunset mode on sunset event\par
+}{\cf20 def} {\cf5 setSunset}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  state{\cf8 .}{\cf21 sunMode} {\cf8 =} {\cf2 "sunset"}{\cf8 ;}\par
+  changeSunMode{\cf8 (}newMode{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf1\i //change mode on sun event\par
+}{\cf20 def} {\cf5 changeSunMode}{\cf8 (}newMode{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}allOk{\cf8 )} {\cf8 \{}\par
+\par
+  {\cf10\b if}{\cf8 (}everyoneIsAway{\cf8 (}{\cf8 )} {\cf8 &}{\cf8 &} {\cf8 (}state{\cf8 .}{\cf21 sunMode} {\cf8 =}{\cf8 =} {\cf2 "sunrise"}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+log{\cf8 .}{\cf21 info}{\cf8 (}{\cf2 "Home is Empty  Setting New Away Mode/nad:www.6.com"}{\cf8 )}\par
+{\cf20 def} delay {\cf8 =} {\cf8 (}falseAlarmThreshold {\cf8 !}{\cf8 =} {\cf10\b null} {\cf8 &}{\cf8 &} falseAlarmThreshold {\cf8 !}{\cf8 =} {\cf2 ""}{\cf8 )} {\cf8 ?} falseAlarmThreshold {\cf8 *} {\cf8 60} {\cf8 :} {\cf8 10} {\cf8 *} {\cf8 60} \par
+runIn{\cf8 (}delay{\cf8 ,} {\cf2 "setAway"}{\cf8 )}\par
+  {\cf8 \}}\par
+\par
+  {\cf10\b if}{\cf8 (}everyoneIsAway{\cf8 (}{\cf8 )} {\cf8 &}{\cf8 &} {\cf8 (}state{\cf8 .}{\cf21 sunMode} {\cf8 =}{\cf8 =} {\cf2 "sunset"}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+log{\cf8 .}{\cf21 info}{\cf8 (}{\cf2 "Home is Empty  Setting New Away Mode/n ad:www.7.com"}{\cf8 )}\par
+{\cf20 def} delay {\cf8 =} {\cf8 (}falseAlarmThreshold {\cf8 !}{\cf8 =} {\cf10\b null} {\cf8 &}{\cf8 &} falseAlarmThreshold {\cf8 !}{\cf8 =} {\cf2 ""}{\cf8 )} {\cf8 ?} falseAlarmThreshold {\cf8 *} {\cf8 60} {\cf8 :} {\cf8 10} {\cf8 *} {\cf8 60} \par
+runIn{\cf8 (}delay{\cf8 ,} {\cf2 "setAway"}{\cf8 )}\par
+  {\cf8 \}}\par
+  \par
+  {\cf10\b else} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 info}{\cf8 (}{\cf2 "Home is Occupied Setting New Home Mode/nad:www.8.com"}{\cf8 )}\par
+  setHome{\cf8 (}{\cf8 )}\par
+\par
+\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf1\i //presence change run logic based on presence state of home\par
+}{\cf20 def} {\cf5 presence}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}allOk{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}evt{\cf8 .}{\cf21 value} {\cf8 =}{\cf8 =} {\cf2 "not present"}{\cf8 )} {\cf8 \{}\par
+log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "Checking if everyone is away"}{\cf8 )}\par
+\par
+{\cf10\b if}{\cf8 (}everyoneIsAway{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 info}{\cf8 (}{\cf2 "Nobody is home, running away sequence/n ad:www.9.com"}{\cf8 )}\par
+  {\cf20 def} delay {\cf8 =} {\cf8 (}falseAlarmThreshold {\cf8 !}{\cf8 =} {\cf10\b null} {\cf8 &}{\cf8 &} falseAlarmThreshold {\cf8 !}{\cf8 =} {\cf2 ""}{\cf8 )} {\cf8 ?} falseAlarmThreshold {\cf8 *} {\cf8 60} {\cf8 :} {\cf8 10} {\cf8 *} {\cf8 60} \par
+  runIn{\cf8 (}delay{\cf8 ,} {\cf2 "setAway"}{\cf8 )}\par
+{\cf8 \}}\par
+  {\cf8 \}}\par
+\par
+{\cf10\b else} {\cf8 \{}\par
+	{\cf20 def} lastTime {\cf8 =} state{\cf8 [}evt{\cf8 .}{\cf21 deviceId}{\cf8 ]}\par
+{\cf10\b if} {\cf8 (}lastTime {\cf8 =}{\cf8 =} {\cf10\b null} {\cf8 |}{\cf8 |} now{\cf8 (}{\cf8 )} {\cf8 -} lastTime {\cf8 >}{\cf8 =} {\cf8 1} {\cf8 *} {\cf8 60000}{\cf8 )} {\cf8 \{}\par
+  		log{\cf8 .}{\cf21 info}{\cf8 (}{\cf2 "Someone is home, running home sequence/nad:www.10.com"}{\cf8 )}\par
+  		setHome{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+	state{\cf8 [}evt{\cf8 .}{\cf21 deviceId}{\cf8 ]} {\cf8 =} now{\cf8 (}{\cf8 )}\par
+\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf1\i //if empty set home to one of the away modes\par
+}{\cf20 def} {\cf5 setAway}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}everyoneIsAway{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+{\cf10\b if}{\cf8 (}state{\cf8 .}{\cf21 sunMode} {\cf8 =}{\cf8 =} {\cf2 "sunset"}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} message {\cf8 =} {\cf2 "Performing \\"$\{awayNight\}\\" for you as requested./nad:www.1.com"}\par
+  log{\cf8 .}{\cf21 info}{\cf8 (}message{\cf8 )}\par
+  sendAway{\cf8 (}message{\cf8 )}\par
+  location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf21 awayNight}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b else} {\cf5 if}{\cf8 (}state{\cf8 .}{\cf21 sunMode} {\cf8 =}{\cf8 =} {\cf2 "sunrise"}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} message {\cf8 =} {\cf2 "Performing \\"$\{awayDay\}\\" for you as requested./nad:www.2.com"}\par
+  log{\cf8 .}{\cf21 debug} message\par
+  log{\cf8 .}{\cf21 info}{\cf8 (}message{\cf8 )}\par
+  sendAway{\cf8 (}message{\cf8 )}\par
+  location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf21 awayDay}{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf10\b else} {\cf8 \{}\par
+  log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "Mode is the same, not evaluating"}{\cf8 )}\par
+{\cf8 \}}\par
+  {\cf8 \}}\par
+\par
+  {\cf10\b else} {\cf8 \{}\par
+log{\cf8 .}{\cf21 info}{\cf8 (}{\cf2 "Somebody returned home before we set to '$\{newAwayMode\}'/nad:www.11.com"}{\cf8 )}\par
+  {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf1\i //set home mode when house is occupied\par
+}{\cf20 def} {\cf5 setHome}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+\par
+log{\cf8 .}{\cf21 info}{\cf8 (}{\cf2 "Setting Home Mode!!/n ad:www.5.com"}{\cf8 )}\par
+{\cf10\b if}{\cf8 (}anyoneIsHome{\cf8 (}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}state{\cf8 .}{\cf21 sunMode} {\cf8 =}{\cf8 =} {\cf2 "sunset"}{\cf8 )}{\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}location{\cf8 .}{\cf21 mode} {\cf8 !}{\cf8 =} {\cf2 "$\{homeModeNight\}"}{\cf8 )}{\cf8 \{}\par
+  {\cf20 def} message {\cf8 =} {\cf2 "Performing \\"$\{homeNight\}\\" for you as requested./nad:www.3.com"}\par
+log{\cf8 .}{\cf21 info}{\cf8 (}message{\cf8 )}\par
+sendHome{\cf8 (}message{\cf8 )}\par
+location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf21 homeNight}{\cf8 )}\par
+{\cf8 \}}\par
+   {\cf8 \}}\par
+   \par
+  {\cf10\b if}{\cf8 (}state{\cf8 .}{\cf21 sunMode} {\cf8 =}{\cf8 =} {\cf2 "sunrise"}{\cf8 )}{\cf8 \{}\par
+  {\cf10\b if} {\cf8 (}location{\cf8 .}{\cf21 mode} {\cf8 !}{\cf8 =} {\cf2 "$\{homeModeDay\}"}{\cf8 )}{\cf8 \{}\par
+  {\cf20 def} message {\cf8 =} {\cf2 "Performing \\"$\{homeDay\}\\" for you as requested./nad:www.4.com"}\par
+log{\cf8 .}{\cf21 info}{\cf8 (}message{\cf8 )}\par
+sendHome{\cf8 (}message{\cf8 )}\par
+location{\cf8 .}{\cf21 helloHome}{\cf8 .}{\cf21 execute}{\cf8 (}settings{\cf8 .}{\cf21 homeDay}{\cf8 )}\par
+{\cf8 \}}\par
+  {\cf8 \}}  \par
+{\cf8 \}}\par
+\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 everyoneIsAway}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} result {\cf8 =} {\cf10\b true}\par
+\par
+  {\cf10\b if}{\cf8 (}people{\cf8 .}{\cf21 findAll} {\cf8 \{} it{\cf8 ?}{\cf8 .}{\cf21 currentPresence} {\cf8 =}{\cf8 =} {\cf2 "present"} {\cf8 \}}{\cf8 )} {\cf8 \{}\par
+result {\cf8 =} {\cf10\b false}\par
+  {\cf8 \}}\par
+\par
+  log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "everyoneIsAway: $\{result\}"}{\cf8 )}\par
+\par
+  {\cf10\b return} result\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 anyoneIsHome}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+  {\cf20 def} result {\cf8 =} {\cf10\b false}\par
+\par
+  {\cf10\b if}{\cf8 (}people{\cf8 .}{\cf21 findAll} {\cf8 \{} it{\cf8 ?}{\cf8 .}{\cf21 currentPresence} {\cf8 =}{\cf8 =} {\cf2 "present"} {\cf8 \}}{\cf8 )} {\cf8 \{}\par
+result {\cf8 =} {\cf10\b true}\par
+  {\cf8 \}}\par
+\par
+  log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "anyoneIsHome: $\{result\}"}{\cf8 )}\par
+\par
+  {\cf10\b return} result\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 sendAway}{\cf8 (}msg{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}sendPushMessage {\cf8 !}{\cf8 =} {\cf2 "No"}{\cf8 )} {\cf8 \{}\par
+log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "Sending push message"}{\cf8 )}\par
+sendPush{\cf8 (}msg{\cf8 )}\par
+  {\cf8 \}}\par
+\par
+  log{\cf8 .}{\cf21 debug}{\cf8 (}msg{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 sendHome}{\cf8 (}msg{\cf8 )} {\cf8 \{}\par
+  {\cf10\b if}{\cf8 (}sendPushMessageHome {\cf8 !}{\cf8 =} {\cf2 "No"}{\cf8 )} {\cf8 \{}\par
+log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "Sending push message"}{\cf8 )}\par
+sendPush{\cf8 (}msg{\cf8 )}\par
+  {\cf8 \}}\par
+\par
+  log{\cf8 .}{\cf21 debug}{\cf8 (}msg{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 getAllOk}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	modeOk {\cf8 &}{\cf8 &} daysOk {\cf8 &}{\cf8 &} timeOk\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 getModeOk}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf20 def} result {\cf8 =} {\cf8 !}modes {\cf8 |}{\cf8 |} modes{\cf8 .}{\cf21 contains}{\cf8 (}location{\cf8 .}{\cf21 mode}{\cf8 )}\par
+	log{\cf8 .}{\cf21 trace} {\cf2 "modeOk = $result"}\par
+	result\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 getDaysOk}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf20 def} result {\cf8 =} {\cf10\b true}\par
+	{\cf10\b if} {\cf8 (}days{\cf8 )} {\cf8 \{}\par
+		{\cf20 def} df {\cf8 =} {\cf10\b new} java{\cf8 .}{\cf21 text}{\cf8 .}{\cf21 SimpleDateFormat}{\cf8 (}{\cf2 "EEEE"}{\cf8 )}\par
+		{\cf10\b if} {\cf8 (}location{\cf8 .}{\cf21 timeZone}{\cf8 )} {\cf8 \{}\par
+			df{\cf8 .}{\cf21 setTimeZone}{\cf8 (}location{\cf8 .}{\cf21 timeZone}{\cf8 )}\par
+		{\cf8 \}}\par
+		{\cf10\b else} {\cf8 \{}\par
+			df{\cf8 .}{\cf21 setTimeZone}{\cf8 (}TimeZone{\cf8 .}{\cf21 getTimeZone}{\cf8 (}{\cf2 "America/New_York"}{\cf8 )}{\cf8 )}\par
+		{\cf8 \}}\par
+		{\cf20 def} day {\cf8 =} df{\cf8 .}{\cf21 format}{\cf8 (}{\cf10\b new} Date{\cf8 (}{\cf8 )}{\cf8 )}\par
+		result {\cf8 =} days{\cf8 .}{\cf21 contains}{\cf8 (}day{\cf8 )}\par
+	{\cf8 \}}\par
+	log{\cf8 .}{\cf21 trace} {\cf2 "daysOk = $result"}\par
+	result\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 getTimeOk}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf20 def} result {\cf8 =} {\cf10\b true}\par
+	{\cf10\b if} {\cf8 (}starting {\cf8 &}{\cf8 &} ending{\cf8 )} {\cf8 \{}\par
+		{\cf20 def} currTime {\cf8 =} now{\cf8 (}{\cf8 )}\par
+		{\cf20 def} start {\cf8 =} timeToday{\cf8 (}starting{\cf8 )}{\cf8 .}{\cf21 time}\par
+		{\cf20 def} stop {\cf8 =} timeToday{\cf8 (}ending{\cf8 )}{\cf8 .}{\cf21 time}\par
+		result {\cf8 =} start {\cf8 <} stop {\cf8 ?} currTime {\cf8 >}{\cf8 =} start {\cf8 &}{\cf8 &} currTime {\cf8 <}{\cf8 =} stop {\cf8 :} currTime {\cf8 <}{\cf8 =} stop {\cf8 |}{\cf8 |} currTime {\cf8 >}{\cf8 =} start\par
+	{\cf8 \}}\par
+	log{\cf8 .}{\cf21 trace} {\cf2 "timeOk = $result"}\par
+	result\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 hhmm}{\cf8 (}time{\cf8 ,} fmt {\cf8 =} {\cf2 "h:mm a"}{\cf8 )}\par
+{\cf8 \{}\par
+	{\cf20 def} t {\cf8 =} timeToday{\cf8 (}time{\cf8 ,} location{\cf8 .}{\cf21 timeZone}{\cf8 )}\par
+	{\cf20 def} f {\cf8 =} {\cf10\b new} java{\cf8 .}{\cf21 text}{\cf8 .}{\cf21 SimpleDateFormat}{\cf8 (}fmt{\cf8 )}\par
+	f{\cf8 .}{\cf21 setTimeZone}{\cf8 (}location{\cf8 .}{\cf21 timeZone} {\cf8 ?}{\cf8 :} timeZone{\cf8 (}time{\cf8 )}{\cf8 )}\par
+	f{\cf8 .}{\cf21 format}{\cf8 (}t{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 getTimeIntervalLabel}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+	{\cf8 (}starting {\cf8 &}{\cf8 &} ending{\cf8 )} {\cf8 ?} hhmm{\cf8 (}starting{\cf8 )} {\cf8 +} {\cf2 "-"} {\cf8 +} hhmm{\cf8 (}ending{\cf8 ,} {\cf2 "h:mm a z"}{\cf8 )} {\cf8 :} {\cf2 ""}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 hideOptionsSection}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	{\cf8 (}starting {\cf8 |}{\cf8 |} ending {\cf8 |}{\cf8 |} days {\cf8 |}{\cf8 |} modes{\cf8 )} {\cf8 ?} {\cf10\b false} {\cf8 :} {\cf10\b true}\par
+{\cf8 \}}\par
+}

